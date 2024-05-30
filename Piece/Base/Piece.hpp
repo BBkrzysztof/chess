@@ -74,9 +74,20 @@ public:
         return bounds.contains(static_cast<sf::Vector2f>(mousePosition));
     }
 
+    void selectPiece() {
+        this->selected = true;
+    }
 
-    void toggleSelect() {
-        this->selected = !this->selected;
+    void unSelectPiece() {
+        this->selected = false;
+    }
+
+    PieceColor getPieceColor() const {
+        return this->pieceColor;
+    }
+
+    PieceType getPieceType() const {
+        return this->pieceType;
     }
 
 protected:
