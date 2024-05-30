@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
+
 #include "../EventListenerInterface.hpp"
 
 class CloseWindowListener : public EventListenerInterface {

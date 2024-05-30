@@ -1,11 +1,10 @@
 #include <SFML/Graphics.hpp>
-#include <limits>
 #include "Piece/Base/Piece.hpp"
-#include "Piece/King.hpp"
 #include "Board/board.hpp"
 #include "EventDispatcher/EventDispatcher.hpp"
 #include "EventDispatcher/Listeners/CloseWindowListener.hpp"
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
+#include "EventDispatcher/Listeners/HoverPieceListener.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");
@@ -23,6 +22,11 @@ int main() {
     EventDispatcher::registerListener(
             sf::Event::MouseButtonPressed,
             new SelectPieceListener
+    );
+
+    EventDispatcher::registerListener(
+            sf::Event::MouseMoved,
+            new HoverPieceListener
     );
 
     while (window.isOpen()) {

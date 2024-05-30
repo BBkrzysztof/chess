@@ -1,6 +1,8 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
 #include <iostream>
+
 #include "../EventListenerInterface.hpp"
 
 class SelectPieceListener : public EventListenerInterface {
@@ -13,6 +15,7 @@ class SelectPieceListener : public EventListenerInterface {
 
                 for (const auto& element: pieces) {
                     if (element.second->validateBounds(mousePosition)) {
+
                         if (this->board->getSelectedPiece() == element.first) {
                             this->board->setSelectedPiece("");
                         } else {
