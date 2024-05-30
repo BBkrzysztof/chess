@@ -7,6 +7,7 @@
 const std::string PATH = "../Piece/icons/";
 
 sf::Color bgColor(255, 255, 153);
+typedef uint64_t Bitboard;
 
 enum PieceColor {
     WHITE_PIECE = 1,
@@ -36,8 +37,8 @@ public:
 
     Piece(PieceColor color, PieceType type, int x, int y) {
 
-        this->positionX = x;
-        this->positionY = y;
+        this->positionX = x * 100;
+        this->positionY = y * 100;
 
         this->pieceType = type;
         this->pieceColor = color;
@@ -100,6 +101,7 @@ public:
 
 protected:
     virtual bool validateMove(int x, int y) = 0;
+    virtual Bitboard getMoveMask(int x, int y) = 0;
 
 private:
 

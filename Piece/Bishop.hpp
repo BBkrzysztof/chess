@@ -11,4 +11,8 @@ protected:
     bool validateMove(int x, int y) final{
         return true;
     }
+
+    Bitboard getMoveMask(int x, int y) final{
+
+    }
 };

@@ -8,7 +8,11 @@ public:
     Rook(PieceColor color, int x, int y) : Piece(color, PieceType::ROOK, x, y) {};
 
 protected:
-    bool validateMove(int x, int y) final{
+    bool validateMove(int x, int y) final {
         return true;
+    }
+
+    Bitboard getMoveMask(int x, int y) final {
+
     }
 };
