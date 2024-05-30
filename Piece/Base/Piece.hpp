@@ -62,7 +62,7 @@ public:
     }
 
     void move(int x, int y) {
-        if (this->validateMove()) {
+        if (this->validateMove(x, y)) {
             this->positionX = x;
             this->positionY = y;
             return this->resetPosition();
@@ -90,8 +90,16 @@ public:
         return this->pieceType;
     }
 
+    int getPositionX() const {
+        return this->positionX;
+    }
+
+    int getPositionY() const {
+        return this->positionY;
+    }
+
 protected:
-    virtual bool validateMove() = 0;
+    virtual bool validateMove(int x, int y) = 0;
 
 private:
 

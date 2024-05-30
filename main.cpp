@@ -5,6 +5,7 @@
 #include "EventDispatcher/Listeners/CloseWindowListener.hpp"
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
 #include "EventDispatcher/Listeners/HoverPieceListener.hpp"
+#include "EventDispatcher/Listeners/MovePieceListener.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");
@@ -25,8 +26,9 @@ int main() {
     );
 
     EventDispatcher::registerListener(
-            sf::Event::MouseMoved,
-            new HoverPieceListener
+            sf::Event::MouseButtonPressed,
+            new MovePieceListener,
+            100
     );
 
     while (window.isOpen()) {

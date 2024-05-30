@@ -2,10 +2,10 @@
 
 #include "Base/Piece.hpp"
 
-class King : public Piece {
+class Rook : public Piece {
 public:
 
-    King(PieceColor color, int x, int y) : Piece(color, PieceType::KING, x, y) {};
+    Rook(PieceColor color, int x, int y) : Piece(color, PieceType::ROOK, x, y) {};
 
 protected:
     bool validateMove(int x, int y) final{
