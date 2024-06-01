@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Board/board.hpp"
+#include "../Assets/BitBoard.hpp"
 
 typedef uint64_t Bitboard;
 
@@ -13,8 +14,109 @@ public:
                blackQueen | whiteKing | blackKing;
     }
 
+    Bitboard calcBeatable(const PieceColor& color) const {
+        if (color == PieceColor::BLACK_PIECE) {
+            return blackPawns | blackKnights | blackBishops | blackRooks | blackQueen;
+        }
 
-public:
+        return whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueen;
+    }
+
+    void updateBitBoard(const PieceType& type, const PieceColor& color, const Bitboard& newValue) {
+        switch (type) {
+            case PieceType::PAWN:
+                color == PieceColor::WHITE_PIECE ? this->whitePawns = newValue : this->blackPawns = newValue;
+                break;
+            case PieceType::KNIGHT:
+                color == PieceColor::WHITE_PIECE ? this->whiteKnights = newValue : this->blackKnights = newValue;
+                break;
+            case PieceType::BISHOP:
+                color == PieceColor::WHITE_PIECE ? this->whiteBishops = newValue : this->blackBishops = newValue;
+                break;
+            case PieceType::ROOK:
+                color == PieceColor::WHITE_PIECE ? this->whiteRooks = newValue : this->blackRooks = newValue;
+                break;
+            case PieceType::QUEEN:
+                color == PieceColor::WHITE_PIECE ? this->whiteQueen = newValue : this->blackQueen = newValue;
+                break;
+            case PieceType::KING:
+                color == PieceColor::WHITE_PIECE ? this->whiteKing = newValue : this->blackKing = newValue;
+                break;
+        }
+    }
+
+    Bitboard getBitBoard(const PieceType& type, const PieceColor& color) {
+        switch (type) {
+            case PieceType::PAWN:
+                return color == PieceColor::WHITE_PIECE ? this->whitePawns : this->blackPawns;
+                break;
+            case PieceType::KNIGHT:
+                return color == PieceColor::WHITE_PIECE ? this->whiteKnights : this->blackKnights;
+                break;
+            case PieceType::BISHOP:
+                return color == PieceColor::WHITE_PIECE ? this->whiteBishops : this->blackBishops;
+                break;
+            case PieceType::ROOK:
+                return color == PieceColor::WHITE_PIECE ? this->whiteRooks : this->blackRooks;
+                break;
+            case PieceType::QUEEN:
+                return color == PieceColor::WHITE_PIECE ? this->whiteQueen : this->blackQueen;
+                break;
+            case PieceType::KING:
+                return color == PieceColor::WHITE_PIECE ? this->whiteKing : this->blackKing;
+                break;
+        }
+    }
+
+    Bitboard getWhitePawns() {
+        return this->whitePawns;
+    }
+
+    Bitboard getBlackPawns() {
+        return this->blackPawns;
+    }
+
+    Bitboard getWhiteKnights() {
+        return this->whiteKnights;
+    }
+
+    Bitboard getBlackKnights() {
+        return this->blackKnights;
+    }
+
+    Bitboard getWhiteBishops() {
+        return this->whiteBishops;
+    }
+
+    Bitboard getBlackBishops() {
+        return this->blackBishops;
+    }
+
+    Bitboard getWhiteRooks() {
+        return this->whiteRooks;
+    }
+
+    Bitboard getBlackRooks() {
+        return this->blackRooks;
+    }
+
+    Bitboard getWhiteQueen() {
+        return this->whiteQueen;
+    }
+
+    Bitboard getBlackQueen() {
+        return this->blackQueen;
+    }
+
+    Bitboard getWhiteKing() {
+        return this->whiteKing;
+    }
+
+    Bitboard getBlackKing() {
+        return this->blackKing;
+    }
+
+private:
     Bitboard whitePawns = 0x00FF000000000000ULL;
     Bitboard blackPawns = 0x000000000000FF00ULL;
 

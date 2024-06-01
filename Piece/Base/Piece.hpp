@@ -6,7 +6,7 @@
 
 const std::string PATH = "../Piece/icons/";
 
-sf::Color bgColor(255, 255, 153);
+sf::Color bgColor(255, 240, 170);
 typedef uint64_t Bitboard;
 
 enum PieceColor {
@@ -50,6 +50,10 @@ public:
 
         this->background.setSize(sf::Vector2f(100, 100));
         this->background.setFillColor(bgColor);
+
+        this->circleShape.setRadius(50);
+        this->circleShape.setFillColor(bgColor);
+
         this->sprite.setTexture(this->texture);
         this->resetPosition();
     }
@@ -59,15 +63,17 @@ public:
             target.draw(this->background);
         }
 
+        if (this->beatable) {
+            target.draw(this->circleShape);
+        }
+
         target.draw(this->sprite);
     }
 
     void move(int x, int y) {
-        if (this->validateMove(x, y)) {
-            this->positionX = x;
-            this->positionY = y;
-            return this->resetPosition();
-        }
+        this->positionX = x * 100;
+        this->positionY = y * 100;
+        this->resetPosition();
     }
 
     bool validateBounds(const sf::Vector2i& mousePosition) {
@@ -81,6 +87,14 @@ public:
 
     void unSelectPiece() {
         this->selected = false;
+    }
+
+    void selectBeatable() {
+        this->beatable = true;
+    }
+
+    void unSelectBeatable() {
+        this->beatable = false;
     }
 
     PieceColor getPieceColor() const {
@@ -99,9 +113,16 @@ public:
         return this->positionY;
     }
 
+    Bitboard getValidMoves() {
+        int row = (this->positionY / 100) * 8;
+        int shift = row + (this->positionX / 100);
+        return this->validMoves[shift];
+    }
+
 protected:
-    virtual bool validateMove(int x, int y) = 0;
-    virtual Bitboard getMoveMask(int x, int y) = 0;
+    virtual void updateBitBoard(int from) = 0;
+
+    virtual void buildValidMoves() = 0;
 
 private:
 
@@ -112,6 +133,11 @@ private:
         );
 
         this->background.setPosition(
+                this->positionX,
+                this->positionY
+        );
+
+        this->circleShape.setPosition(
                 this->positionX,
                 this->positionY
         );
@@ -128,10 +154,15 @@ private:
         return icon;
     }
 
+protected:
+    Bitboard validMoves[64];
+
 private:
     int positionX = 0;
     int positionY = 0;
+
     bool selected = false;
+    bool beatable = false;
 
     PieceColor pieceColor;
     PieceType pieceType;
@@ -139,5 +170,5 @@ private:
     sf::Sprite sprite;
     sf::Texture texture;
     sf::RectangleShape background;
-
+    sf::CircleShape circleShape;
 };

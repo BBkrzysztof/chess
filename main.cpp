@@ -32,13 +32,14 @@ int main() {
             100
     );
 
+
     while (window.isOpen()) {
+        window.clear();
+
         sf::Event event;
         while (window.pollEvent(event)) {
             EventDispatcher::dispatch(event);
         }
-
-        window.clear();
 
         board->draw(window);
 

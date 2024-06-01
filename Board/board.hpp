@@ -15,6 +15,7 @@
 #include "../Piece/Knight.hpp"
 #include "../Piece/Queen.hpp"
 #include "../Piece/Base/Piece.hpp"
+#include "../Piece/Base/MoveIndicator.hpp"
 
 typedef uint64_t Bitboard;
 
@@ -34,7 +35,6 @@ public:
         this->registerQueens();
         this->registerKings();
     };
-
 
     void draw(sf::RenderTarget& target) {
         // draw board
@@ -65,14 +65,45 @@ public:
 
             element.second->draw(target);
         }
+
+        for (const auto& element: this->indicators) {
+            element->draw(target);
+        }
     }
 
     std::map<std::string, Piece*> getPieces() {
         return this->pieces;
     }
 
-    void setSelectedPiece(std::string pieceHash) {
+    void move(Piece* selectedPiece, int newX, int newY) {
+        int oldX = selectedPiece->getPositionX() / 100;
+        int oldY = selectedPiece->getPositionY() / 100;
+
+        Bitboard current = this->gameState->getBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor()
+        );
+
+        Bitboard newBitBoard = BitBoard::moveOnBitBoard(
+                current,
+                (oldY * 8 + oldX),
+                (newY * 8 + newX)
+        );
+
+        selectedPiece->move(newX, newY);
+
+        this->gameState->updateBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor(),
+                newBitBoard
+        );
+
+        this->setSelectedPiece("");
+    }
+
+    void setSelectedPiece(const std::string& pieceHash) {
         this->selectedPiece = pieceHash;
+        this->clearIndicators();
     }
 
     std::string getSelectedPiece() {
@@ -81,6 +112,36 @@ public:
 
     Piece* getSelectedPieceReference() {
         return this->pieces[this->selectedPiece];
+    }
+
+    void clearIndicators() {
+        this->indicators.clear();
+    }
+
+    std::vector<MoveIndicator*> getIndicators() {
+        return this->indicators;
+    }
+
+    void markBeatable(const Bitboard& bitboard) {
+        auto pieces = this->getPieces();
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                if (bitboard & (1ULL << (rank * 8 + file))) {
+
+                }
+            }
+        }
+    }
+
+    void drawValidMoves(const Bitboard& bitboard) {
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                if (bitboard & (1ULL << (rank * 8 + file))) {
+                    auto* mi = new MoveIndicator(file, rank);
+                    this->indicators.push_back(mi);
+                }
+            }
+        }
     }
 
 private:
@@ -94,84 +155,84 @@ private:
     }
 
     void registerPawns() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Pawn(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whitePawns);
+        }, this->gameState->getWhitePawns());
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Pawn(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackPawns);
+        }, this->gameState->getBlackPawns());
     }
 
     void registerKnights() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Knight(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whiteKnights);
+        }, this->gameState->getWhiteKnights());
 
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Knight(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackKnights);
+        }, this->gameState->getBlackKnights());
     }
 
     void registerBishops() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Bishop(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whiteBishops);
+        }, this->gameState->getWhiteBishops());
 
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Bishop(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackBishops);
+        }, this->gameState->getBlackBishops());
     }
 
     void registerRooks() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Rook(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whiteRooks);
+        }, this->gameState->getWhiteRooks());
 
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Rook(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackRooks);
+        }, this->gameState->getBlackRooks());
 
     }
 
     void registerQueens() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Queen(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whiteQueen);
+        }, this->gameState->getWhiteQueen());
 
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Queen(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackQueen);
+        }, this->gameState->getBlackQueen());
     }
 
     void registerKings() {
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new King(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->whiteKing);
+        }, this->gameState->getWhiteKing());
 
 
-        this->registerPiecesGroup([this](const int& x, const int& y) {
+        Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new King(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-        }, this->gameState->blackKing);
+        }, this->gameState->getBlackKing());
     }
 
-    void registerPiecesGroup(const std::function<void(int, int)>& reg, const Bitboard& bitboard) {
+    static void registerPiecesGroup(const std::function<void(int, int)>& reg, const Bitboard& bitboard) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
                 if (bitboard & (1ULL << (rank * 8 + file))) {
@@ -185,9 +246,10 @@ private:
         this->pieces[Board::pieceKey(piece)] = piece;
     }
 
-
 private:
     std::map<std::string, Piece*> pieces;
+    std::vector<MoveIndicator*> indicators;
+
     std::string selectedPiece;
 
     GameState* gameState;

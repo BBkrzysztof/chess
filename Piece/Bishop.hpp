@@ -8,11 +8,11 @@ public:
     Bishop(PieceColor color, int x, int y) : Piece(color, PieceType::BISHOP, x, y) {};
 
 protected:
-    bool validateMove(int x, int y) final{
-        return true;
+    void updateBitBoard(int from) final{
+
     }
 
-    Bitboard getMoveMask(int x, int y) final{
+    void buildValidMoves() final{
 
     }
 };

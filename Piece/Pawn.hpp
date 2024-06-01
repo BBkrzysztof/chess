@@ -8,11 +8,11 @@ public:
     Pawn(PieceColor color, int x, int y) : Piece(color, PieceType::PAWN, x, y) {};
 
 protected:
-    bool validateMove(int x, int y) final {
-        return x == 500 && y == 500;
+    void updateBitBoard(int from) final {
+
     }
 
-    Bitboard getMoveMask(int x, int y) final{
+    void buildValidMoves() final {
 
     }
 };

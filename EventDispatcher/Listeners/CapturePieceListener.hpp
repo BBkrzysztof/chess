@@ -1,10 +1,5 @@
 #pragma once
 
-
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <cmath>
-
 #include "../EventListenerInterface.hpp"
 #include "../../Assets/BitBoard.hpp"
 
@@ -20,7 +15,7 @@ class MovePieceListener : public EventListenerInterface {
 
                     for (const auto& indicator: indicators) {
                         if (indicator->validateBounds(mousePosition) &&
-                            indicator->getMoveOption() == MoveOptions::Move) {
+                            indicator->getMoveOption() == MoveOptions::Capture) {
                             this->board->move(
                                     selectedPiece,
                                     indicator->getPositionX(),
@@ -28,6 +23,7 @@ class MovePieceListener : public EventListenerInterface {
                             );
                         }
                     }
+
                 }
             }
         }
