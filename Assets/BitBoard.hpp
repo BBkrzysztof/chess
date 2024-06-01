@@ -36,4 +36,15 @@ public:
         bitboard &= ~(1ULL << from);
         return bitboard;
     }
+
+    static int calcShift(int x, int y) {
+        if (x > 100) {
+            x /= 100;
+        }
+        if (y > 100) {
+            y /= 100;
+        }
+
+        return y * 8 + x;
+    }
 };

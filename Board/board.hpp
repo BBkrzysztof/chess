@@ -86,8 +86,8 @@ public:
 
         Bitboard newBitBoard = BitBoard::moveOnBitBoard(
                 current,
-                (oldY * 8 + oldX),
-                (newY * 8 + newX)
+                BitBoard::calcShift(oldX, oldY),
+                BitBoard::calcShift(newX, newY)
         );
 
         selectedPiece->move(newX, newY);
@@ -100,6 +100,7 @@ public:
 
         this->setSelectedPiece("");
         this->gameState->toggleTurn();
+        this->resetBeatable();
     }
 
     void capture(int oldX, int oldY) {
@@ -121,7 +122,7 @@ public:
         auto element = this->pieces.find(selectedPiece->getHash());
         this->pieces.erase(element);
 
-        Bitboard newBitBoard = BitBoard::capture(current, (oldY * 8 + oldX));
+        Bitboard newBitBoard = BitBoard::capture(current, BitBoard::calcShift(oldX, oldY));
 
         this->gameState->updateBitBoard(
                 selectedPiece->getPieceType(),
@@ -156,7 +157,7 @@ public:
     void drawValidMoves(const Bitboard& validMoves, const Bitboard& captureMoves) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
-                if (validMoves & (1ULL << (rank * 8 + file))) {
+                if (validMoves & (1ULL << BitBoard::calcShift(file, rank))) {
                     auto* mi = new MoveIndicator(file, rank);
                     this->indicators.push_back(mi);
                 }
@@ -165,7 +166,7 @@ public:
         std::vector<MoveIndicator*> beatables;
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
-                if (captureMoves & (1ULL << (rank * 8 + file))) {
+                if (captureMoves & (1ULL << BitBoard::calcShift(file, rank))) {
                     auto* mi = new MoveIndicator(file, rank, MoveOptions::Capture);
                     this->indicators.push_back(mi);
                     beatables.push_back(mi);
@@ -284,7 +285,7 @@ private:
     static void registerPiecesGroup(const std::function<void(int, int)>& reg, const Bitboard& bitboard) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
-                if (bitboard & (1ULL << (rank * 8 + file))) {
+                if (bitboard & (1ULL <<  BitBoard::calcShift(file, rank))) {
                     reg(file, rank);
                 }
             }

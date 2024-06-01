@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base/Piece.hpp"
+#include "../Assets/Container.hpp"
 
 class Pawn : public Piece {
 public:
@@ -12,6 +13,9 @@ public:
 protected:
 
     void buildValidMoves() final {
+
+        Bitboard captures = Container::getGameState()->calcBeatable(this->getPieceColor());
+
         if (this->getPieceColor() == PieceColor::BLACK_PIECE) {
             for (int i = 0; i < 64; i++) {
                 Bitboard bitboard = 1ULL << i;
@@ -19,18 +23,26 @@ protected:
 
                 // Przesuwanie o jedno pole w górę
                 if (i / 8 != 7) {
-                    moves |= bitboard << 8;
+                    if (!(captures & (bitboard << 8))) {
+                        moves |= bitboard << 8;
+                    }
                 }
                 // Bicie w lewo i prawo
                 if (i % 8 != 0 && i / 8 != 7) {
-                    moves |= bitboard << 7;
+                    if (captures & (bitboard << 7)) {
+                        moves |= bitboard << 7;
+                    }
                 }
                 if (i % 8 != 7 && i / 8 != 7) {
-                    moves |= bitboard << 9;
+                    if (captures & (bitboard << 9)) {
+                        moves |= bitboard << 9;
+                    }
                 }
                 // Przesuwanie o dwa pola z pozycji startowej
                 if (i / 8 == 1) {
-                    moves |= bitboard << 16;
+                    if (!(captures & (bitboard << 16))) {
+                        moves |= bitboard << 16;
+                    }
                 }
 
                 this->validMoves[i] = moves;
@@ -42,18 +54,26 @@ protected:
 
                 // Przesuwanie o jedno pole w dół
                 if (i / 8 != 0) {
-                    moves |= bitboard >> 8;
+                    if (!(captures & (bitboard >> 8))) {
+                        moves |= bitboard >> 8;
+                    }
                 }
                 // Bicie w lewo i prawo
                 if (i % 8 != 0 && i / 8 != 0) {
-                    moves |= bitboard >> 9;
+                    if (captures & (bitboard >> 9)) {
+                        moves |= bitboard >> 9;
+                    }
                 }
                 if (i % 8 != 7 && i / 8 != 0) {
-                    moves |= bitboard >> 7;
+                    if (captures & (bitboard >> 7)) {
+                        moves |= bitboard >> 7;
+                    }
                 }
                 // Przesuwanie o dwa pola z pozycji startowej
                 if (i / 8 == 6) {
-                    moves |= bitboard >> 16;
+                    if (!(captures & (bitboard >> 16))) {
+                        moves |= bitboard >> 16;
+                    }
                 }
 
                 this->validMoves[i] = moves;
