@@ -7,6 +7,8 @@
 #include "EventDispatcher/Listeners/HoverPieceListener.hpp"
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
+#include "Assets/Container.hpp"
+
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");
@@ -15,7 +17,7 @@ int main() {
     auto* gameState = new GameState();
     auto* board = new Board(gameState);
 
-    EventDispatcher::setContext(board, gameState, &window);
+    Container::buildContainer(board, gameState, &window);
 
     EventDispatcher::registerListener(
             sf::Event::Closed,

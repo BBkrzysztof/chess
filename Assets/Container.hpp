@@ -1,0 +1,38 @@
+#pragma once
+
+#include "../GameState/GameState.hpp"
+#include "../Board/board.hpp"
+
+class Container {
+public:
+    static void buildContainer(
+            Board* board,
+            GameState* gameState,
+            sf::RenderWindow* window
+    ) {
+        Container::gameState = gameState;
+        Container::board = board;
+        Container::window = window;
+    }
+
+    static Board* getBoard() {
+        return Container::board;
+    }
+
+    static GameState* getGameState() {
+        return Container::gameState;
+    }
+
+    static sf::RenderWindow* getWindow() {
+        return Container::window;
+    }
+
+private:
+    static Board* board;
+    static GameState* gameState;
+    static sf::RenderWindow* window;
+};
+
+Board* Container::board = nullptr;
+GameState* Container::gameState = nullptr;
+sf::RenderWindow* Container::window = nullptr;

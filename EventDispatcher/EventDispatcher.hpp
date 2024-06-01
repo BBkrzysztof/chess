@@ -8,6 +8,7 @@
 #include "EventListenerInterface.hpp"
 #include "../Board/board.hpp"
 #include "../GameState/GameState.hpp"
+#include "../Assets/Container.hpp"
 
 struct listenerStruct {
     EventListenerInterface* listenerInterface = nullptr;
@@ -36,9 +37,9 @@ public:
             while (!rlisteners.empty()) {
                 auto listener = rlisteners.top();
                 listener.listenerInterface->setContext(
-                        EventDispatcher::board,
-                        EventDispatcher::state,
-                        EventDispatcher::window
+                        Container::getBoard(),
+                        Container::getGameState(),
+                        Container::getWindow()
                 );
 
                 listener.listenerInterface->onEvent(event);
@@ -54,26 +55,15 @@ public:
         EventDispatcher::listeners[eventType].emplace(listener, priority);
     }
 
-    static void setContext(Board* gameBoard, GameState* gameState, sf::RenderWindow* window) {
-        EventDispatcher::board = gameBoard;
-        EventDispatcher::state = gameState;
-        EventDispatcher::window = window;
-    }
-
 private:
     static std::unordered_map<
             sf::Event::EventType,
             std::priority_queue<listenerStruct, std::vector<listenerStruct>>
     > listeners;
-    static Board* board;
-    static GameState* state;
-    static sf::RenderWindow* window;
+
 };
 
 std::unordered_map<
         sf::Event::EventType,
         std::priority_queue<listenerStruct, std::vector<listenerStruct>>
 > EventDispatcher::listeners = {};
-Board* EventDispatcher::board = nullptr;
-GameState* EventDispatcher::state = nullptr;
-sf::RenderWindow* EventDispatcher::window = nullptr;
