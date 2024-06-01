@@ -63,7 +63,7 @@ public:
 private:
     static std::unordered_map<
             sf::Event::EventType,
-            std::priority_queue<listenerStruct, std::vector<listenerStruct>, std::greater<listenerStruct>>
+            std::priority_queue<listenerStruct, std::vector<listenerStruct>>
     > listeners;
     static Board* board;
     static GameState* state;
@@ -72,7 +72,7 @@ private:
 
 std::unordered_map<
         sf::Event::EventType,
-        std::priority_queue<listenerStruct, std::vector<listenerStruct>, std::greater<listenerStruct>>
+        std::priority_queue<listenerStruct, std::vector<listenerStruct>>
 > EventDispatcher::listeners = {};
 Board* EventDispatcher::board = nullptr;
 GameState* EventDispatcher::state = nullptr;

@@ -15,10 +15,13 @@ class SelectPieceListener : public EventListenerInterface {
                 auto pieces = this->board->getPieces();
 
                 for (const auto& element: pieces) {
-                    if (element.second->validateBounds(mousePosition)) {
+                    if (element.second->getPieceColor() == this->gameState->getTurn() &&
+                        element.second->validateBounds(mousePosition)) {
+
                         if (this->board->getSelectedPiece() == element.first) {
                             this->board->setSelectedPiece("");
                             this->board->clearIndicators();
+                            this->board->resetBeatable();
                         } else {
                             this->board->setSelectedPiece(element.first);
 
@@ -26,16 +29,12 @@ class SelectPieceListener : public EventListenerInterface {
 
                             Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
 
-//                            BitBoard::dump(this->gameState->calcOccupied(), "valid moves");
 
-                            Bitboard beatable = selectedPiece->getValidMoves() &
-                                                ~this->gameState->calcBeatable(
-                                                        selectedPiece->getPieceColor()
-                                                );
+                            Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
+                                    selectedPiece->getPieceColor()
+                            );
 
-                            BitBoard::dump(beatable, "beatable");
-
-                            this->board->drawValidMoves(validMoves | beatable);
+                            this->board->drawValidMoves(validMoves, captureMoves);
                         }
                     }
                 }

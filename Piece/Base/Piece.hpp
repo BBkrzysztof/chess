@@ -119,6 +119,18 @@ public:
         return this->validMoves[shift];
     }
 
+    bool operator==(const Piece& other) {
+        return this->hash == other.hash;
+    }
+
+    void setHash(const std::string& hash) {
+        this->hash = hash;
+    }
+
+    std::string getHash() const {
+        return this->hash;
+    }
+
 protected:
     virtual void updateBitBoard(int from) = 0;
 
@@ -163,6 +175,8 @@ private:
 
     bool selected = false;
     bool beatable = false;
+
+    std::string hash;
 
     PieceColor pieceColor;
     PieceType pieceType;

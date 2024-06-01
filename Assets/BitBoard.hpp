@@ -26,10 +26,14 @@ public:
     }
 
     static Bitboard moveOnBitBoard(Bitboard bitboard, int from, int to) {
-        bitboard = bitboard & ~(1ULL << from);
+        bitboard &= ~(1ULL << from);
         bitboard |= (1ULL << to);
 
         return bitboard;
     }
 
+    static Bitboard capture(Bitboard bitboard, int from) {
+        bitboard &= ~(1ULL << from);
+        return bitboard;
+    }
 };

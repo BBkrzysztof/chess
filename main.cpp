@@ -6,6 +6,7 @@
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
 #include "EventDispatcher/Listeners/HoverPieceListener.hpp"
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
+#include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");
@@ -23,7 +24,8 @@ int main() {
 
     EventDispatcher::registerListener(
             sf::Event::MouseButtonPressed,
-            new SelectPieceListener
+            new SelectPieceListener,
+            1000
     );
 
     EventDispatcher::registerListener(
@@ -32,6 +34,11 @@ int main() {
             100
     );
 
+    EventDispatcher::registerListener(
+            sf::Event::MouseButtonPressed,
+            new CapturePieceListener,
+            101
+    );
 
     while (window.isOpen()) {
         window.clear();

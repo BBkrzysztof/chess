@@ -101,6 +101,36 @@ public:
         this->setSelectedPiece("");
     }
 
+    void capture(int oldX, int oldY) {
+
+        auto result = std::find_if(
+                this->pieces.begin(),
+                this->pieces.end(),
+                [oldX, oldY](const std::pair<std::string, Piece*>& element) {
+                    return element.second->getPositionX() == oldX * 100 && element.second->getPositionY() == oldY * 100;
+                }
+        );
+        Piece* selectedPiece = result->second;
+
+        Bitboard current = this->gameState->getBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor()
+        );
+
+        auto element = this->pieces.find(selectedPiece->getHash());
+        this->pieces.erase(element);
+
+        Bitboard newBitBoard = BitBoard::capture(current, (oldY * 8 + oldX));
+
+        this->gameState->updateBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor(),
+                newBitBoard
+        );
+
+        delete selectedPiece;
+    }
+
     void setSelectedPiece(const std::string& pieceHash) {
         this->selectedPiece = pieceHash;
         this->clearIndicators();
@@ -122,25 +152,42 @@ public:
         return this->indicators;
     }
 
-    void markBeatable(const Bitboard& bitboard) {
-        auto pieces = this->getPieces();
+    void drawValidMoves(const Bitboard& validMoves, const Bitboard& captureMoves) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
-                if (bitboard & (1ULL << (rank * 8 + file))) {
-
-                }
-            }
-        }
-    }
-
-    void drawValidMoves(const Bitboard& bitboard) {
-        for (int rank = 7; rank >= 0; --rank) {
-            for (int file = 0; file < 8; ++file) {
-                if (bitboard & (1ULL << (rank * 8 + file))) {
+                if (validMoves & (1ULL << (rank * 8 + file))) {
                     auto* mi = new MoveIndicator(file, rank);
                     this->indicators.push_back(mi);
                 }
             }
+        }
+        std::vector<MoveIndicator*> beatables;
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                if (captureMoves & (1ULL << (rank * 8 + file))) {
+                    auto* mi = new MoveIndicator(file, rank, MoveOptions::Capture);
+                    this->indicators.push_back(mi);
+                    beatables.push_back(mi);
+                }
+            }
+        }
+
+        this->resetBeatable();
+
+        for (const auto& beatable: beatables) {
+            for (const auto& element: this->pieces) {
+                if (element.second->getPositionX() == beatable->getPositionX() * 100 &&
+                    element.second->getPositionY() == beatable->getPositionY() * 100) {
+                    element.second->selectBeatable();
+                }
+            }
+        }
+
+    }
+
+    void resetBeatable() {
+        for (const auto& element: this->pieces) {
+            element.second->unSelectBeatable();
         }
     }
 
@@ -150,6 +197,7 @@ private:
         static int id = 0;
         std::stringstream s;
         s << piece->getPieceType() << "-" << piece->getPieceColor() << "-" << id;
+        piece->setHash(s.str());
         id += 1;
         return s.str();
     }

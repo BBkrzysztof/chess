@@ -15,7 +15,7 @@ public:
     }
 
     Bitboard calcBeatable(const PieceColor& color) const {
-        if (color == PieceColor::BLACK_PIECE) {
+        if (color == PieceColor::WHITE_PIECE) {
             return blackPawns | blackKnights | blackBishops | blackRooks | blackQueen;
         }
 
@@ -116,6 +116,15 @@ public:
         return this->blackKing;
     }
 
+    PieceColor getTurn() const {
+        return this->turn;
+    }
+
+    void toggleTurn() {
+        this->turn == PieceColor::WHITE_PIECE ? this->turn = PieceColor::BLACK_PIECE
+                                              : this->turn = PieceColor::WHITE_PIECE;
+    }
+
 private:
     Bitboard whitePawns = 0x00FF000000000000ULL;
     Bitboard blackPawns = 0x000000000000FF00ULL;
@@ -134,6 +143,8 @@ private:
 
     Bitboard whiteKing = 0x1000000000000000ULL;
     Bitboard blackKing = 0x0000000000000010ULL;
+
+    PieceColor turn = PieceColor::WHITE_PIECE;
 
     friend class board;
 };
