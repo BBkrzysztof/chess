@@ -131,8 +131,12 @@ public:
         return this->hash;
     }
 
+    void rebuildValidMoves() {
+        this->buildValidMoves();
+    }
+
+
 protected:
-    virtual void updateBitBoard(int from) = 0;
 
     virtual void buildValidMoves() = 0;
 

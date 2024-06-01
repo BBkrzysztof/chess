@@ -10,9 +10,6 @@ public:
     };
 
 protected:
-    void updateBitBoard(int from) final {
-
-    }
 
     void buildValidMoves() final {
         for (int i = 0 ; i < 64; i++) {

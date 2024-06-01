@@ -99,6 +99,7 @@ public:
         );
 
         this->setSelectedPiece("");
+        this->gameState->toggleTurn();
     }
 
     void capture(int oldX, int oldY) {

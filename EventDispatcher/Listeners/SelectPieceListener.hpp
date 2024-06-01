@@ -26,7 +26,7 @@ class SelectPieceListener : public EventListenerInterface {
                             this->board->setSelectedPiece(element.first);
 
                             auto selectedPiece = this->board->getSelectedPieceReference();
-
+                            selectedPiece->rebuildValidMoves();
                             Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
 
 

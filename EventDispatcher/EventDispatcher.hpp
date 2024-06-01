@@ -32,6 +32,8 @@ class EventDispatcher {
 public:
 
     static void dispatch(const sf::Event& event) {
+        auto d = Container::getGameState();
+
         try {
             auto rlisteners = EventDispatcher::listeners.at(event.type);
             while (!rlisteners.empty()) {

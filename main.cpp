@@ -14,8 +14,10 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");
 
 
-    auto* gameState = new GameState();
-    auto* board = new Board(gameState);
+    GameState* gameState = new GameState();
+    Container::setGameSate(gameState);
+
+    Board* board = new Board(gameState);
 
     Container::buildContainer(board, gameState, &window);
 

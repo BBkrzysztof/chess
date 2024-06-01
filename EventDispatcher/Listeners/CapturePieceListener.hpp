@@ -24,6 +24,7 @@ class CapturePieceListener : public EventListenerInterface {
                                     indicator->getPositionX(),
                                     indicator->getPositionY()
                             );
+
                         }
                     }
 

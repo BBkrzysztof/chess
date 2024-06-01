@@ -3,6 +3,8 @@
 #include "../GameState/GameState.hpp"
 #include "../Board/board.hpp"
 
+class Board;
+
 class Container {
 public:
     static void buildContainer(
@@ -13,6 +15,10 @@ public:
         Container::gameState = gameState;
         Container::board = board;
         Container::window = window;
+    }
+
+    static void setGameSate(GameState* gameState){
+        Container::gameState=gameState;
     }
 
     static Board* getBoard() {
