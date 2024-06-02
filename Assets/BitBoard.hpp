@@ -37,6 +37,10 @@ public:
         return bitboard;
     }
 
+    static bool isSquareAttacked(Bitboard square, Bitboard attacked) {
+        return (attacked & square) != 0;
+    }
+
     static int calcShift(int x, int y) {
         if (x > 100) {
             x /= 100;
@@ -50,8 +54,6 @@ public:
 
     static bool matchBitboard(Bitboard bitboard, int shift) {
         Bitboard d = 0LL << shift;
-        BitBoard::dump(d, "shift");
-        BitBoard::dump(bitboard, "org");
 
         return (bitboard & (d));
     }

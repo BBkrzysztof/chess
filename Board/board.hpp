@@ -16,7 +16,6 @@
 #include "../Piece/Knight.hpp"
 #include "../Piece/Queen.hpp"
 #include "../Piece/Base/Piece.hpp"
-#include "../Piece/Base/MoveIndicator.hpp"
 
 typedef uint64_t Bitboard;
 
@@ -116,8 +115,106 @@ public:
         this->setSelectedPiece("");
     }
 
-    void capture(int oldX, int oldY) {
+    void castle(MoveOptions options, PieceColor pieceColor) {
+        int oldX = 0, oldY = 0;
 
+        if (options == MoveOptions::KING_SIDE_CASTLE) {
+            if (pieceColor == PieceColor::WHITE_PIECE) {
+                oldX = 7;
+                oldY = 7;
+            } else {
+                oldX = 7;
+                oldY = 0;
+            }
+        } else {
+            if (pieceColor == PieceColor::WHITE_PIECE) {
+                oldX = 0;
+                oldY = 7;
+            } else {
+                oldX = 0;
+                oldY = 0;
+            }
+        }
+
+        auto result = std::find_if(
+                this->pieces.begin(),
+                this->pieces.end(),
+                [oldX, oldY](const std::pair<std::string, Piece*>& element) {
+                    return element.second->getPositionX() == oldX * 100 && element.second->getPositionY() == oldY * 100;
+                }
+        );
+
+        Piece* selectedPiece = result->second;
+        Piece* king = this->pieces[pieceColor == PieceColor::WHITE_PIECE ? WHITE_KING : BLACK_KING];
+
+        Bitboard rookBoard = this->gameState->getBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor()
+        );
+
+        Bitboard kingBoard = this->gameState->getBitBoard(
+                king->getPieceType(),
+                king->getPieceColor()
+        );
+
+        int rookX = 0;
+        int kingX = 0;
+        int rookY = selectedPiece->getPositionY() / 100;
+        int kingY = king->getPositionY() / 100;
+
+        if (options == MoveOptions::KING_SIDE_CASTLE) {
+            rookX = selectedPiece->getPositionX() / 100 - 2;
+            kingX = king->getPositionX() / 100 + 2;
+        } else {
+            rookX = selectedPiece->getPositionX() / 100 + 3;
+            kingX = king->getPositionX() / 100 - 2;
+        }
+
+        Bitboard newRookBitBoard = BitBoard::moveOnBitBoard(
+                rookBoard,
+                BitBoard::calcShift(selectedPiece->getPositionX() / 100, rookY),
+                BitBoard::calcShift(rookX, rookY)
+        );
+
+        Bitboard newKingBitBoard = BitBoard::moveOnBitBoard(
+                kingBoard,
+                BitBoard::calcShift(king->getPositionX() / 100, kingY),
+                BitBoard::calcShift(kingX, kingY)
+        );
+
+        selectedPiece->move(rookX, rookY);
+        king->move(kingX, kingY);
+
+        this->gameState->updateBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor(),
+                newRookBitBoard
+        );
+
+        this->gameState->updateBitBoard(
+                king->getPieceType(),
+                king->getPieceColor(),
+                newKingBitBoard
+        );
+
+        if (pieceColor == PieceColor::WHITE_PIECE) {
+            this->gameState->whiteCastleMoved = true;
+        } else {
+            this->gameState->blackCastleMoved = true;
+        }
+
+        this->gameState->updateHistory(
+                0,
+                0,
+                options,
+                king
+        );
+
+        this->gameState->toggleTurn();
+        this->setSelectedPiece("");
+    }
+
+    void capture(int oldX, int oldY) {
 
         auto result = std::find_if(
                 this->pieces.begin(),
@@ -134,11 +231,12 @@ public:
             selectedPiece = this->gameState->peekHistory()->piece;
         }
 
-
         Bitboard current = this->gameState->getBitBoard(
                 selectedPiece->getPieceType(),
                 selectedPiece->getPieceColor()
         );
+
+        this->gameState->markFirstMove(selectedPiece);
 
         auto element = this->pieces.find(selectedPiece->getHash());
         this->pieces.erase(element);
@@ -175,7 +273,12 @@ public:
         return this->indicators;
     }
 
-    void drawValidMoves(const Bitboard& validMoves, const Bitboard& captureMoves) {
+    void drawValidMoves(
+            const Bitboard& validMoves,
+            const Bitboard& captureMoves,
+            const Bitboard& kingSideCastle,
+            const Bitboard& queenSideCastle
+    ) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
                 if (validMoves & (1ULL << BitBoard::calcShift(file, rank))) {
@@ -193,18 +296,28 @@ public:
                 }
             }
         }
+
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                if (kingSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
+                    auto* mi = new MoveIndicator(file, rank, MoveOptions::KING_SIDE_CASTLE);
+                    this->indicators.push_back(mi);
+                }
+                if (queenSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
+                    auto* mi = new MoveIndicator(file, rank, MoveOptions::QUEEN_SIDE_CASTLE);
+                    this->indicators.push_back(mi);
+                }
+            }
+        }
     }
 
     void isCheck() {
         auto color = Container::getGameState()->getTurn();
         bool isEnemyWhite = color == PieceColor::WHITE_PIECE;
 
-        auto enemyTeam = this->teams.at(isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
-        Bitboard attacks = 0LL;
+        Bitboard attacks = Container::getGameState()->getAttackedSquares(
+                isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
 
-        for (const auto& element: enemyTeam) {
-            attacks |= (element->getValidMoves());
-        }
         Bitboard kingPosition = Container::getGameState()->getBitBoard(PieceType::KING, color);
 
         if ((kingPosition & attacks) != 0LL) {
@@ -238,13 +351,13 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Pawn(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhitePawns());
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Pawn(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackPawns());
     }
 
@@ -252,14 +365,14 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Knight(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhiteKnights());
 
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Knight(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackKnights());
     }
 
@@ -267,14 +380,14 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Bishop(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhiteBishops());
 
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Bishop(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackBishops());
     }
 
@@ -282,14 +395,14 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Rook(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhiteRooks());
 
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Rook(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackRooks());
 
     }
@@ -298,14 +411,14 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Queen(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhiteQueen());
 
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new Queen(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackQueen());
     }
 
@@ -313,14 +426,14 @@ private:
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new King(PieceColor::WHITE_PIECE, x, y);
             this->registerPiece(piece, WHITE_KING);
-            this->teams[PieceColor::WHITE_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::WHITE_PIECE].push_back(piece);
         }, this->gameState->getWhiteKing());
 
 
         Board::registerPiecesGroup([this](const int& x, const int& y) {
             auto* piece = new King(PieceColor::BLACK_PIECE, x, y);
             this->registerPiece(piece, BLACK_KING);
-            this->teams[PieceColor::BLACK_PIECE].push_back(piece);
+            this->gameState->teams[PieceColor::BLACK_PIECE].push_back(piece);
         }, this->gameState->getBlackKing());
     }
 
@@ -341,7 +454,7 @@ private:
 
 private:
     std::map<std::string, Piece*> pieces;
-    std::unordered_map<PieceColor, std::vector<Piece*>> teams;
+
     std::vector<MoveIndicator*> indicators;
 
     std::string selectedPiece;

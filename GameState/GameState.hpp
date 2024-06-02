@@ -204,6 +204,95 @@ public:
         return &this->moveHistory.top();
     }
 
+    Bitboard getAttackedSquares(PieceColor team) {
+
+        auto enemyTeam = this->teams.at(team);
+
+        Bitboard attacks = 0LL;
+
+        for (const auto& element: enemyTeam) {
+            element->rebuildValidMoves();
+            attacks |= (element->getValidMoves());
+        }
+
+        return attacks;
+    }
+
+    bool canCastle(bool isWhite, bool kingSide) {
+        Bitboard occupied = this->calcOccupied();
+
+        if (!isWhite) {
+            if (this->whiteKingMoved || this->whiteCastleMoved) return false;
+            Bitboard attacked = this->getAttackedSquares(PieceColor::WHITE_PIECE);
+
+            if (kingSide) {
+                if (this->whiteRookH1Moved) return false;
+                if (occupied & (0x60ULL)) return false;
+                if (BitBoard::isSquareAttacked(0x60ULL, attacked)) return false;
+            } else {
+                if (this->whiteRookA1Moved) return false;
+                if (occupied & (0xEULL)) return false;
+                if (BitBoard::isSquareAttacked(0xEULL, attacked)) return false;
+            }
+
+        } else {
+            Bitboard attacked = this->getAttackedSquares(PieceColor::BLACK_PIECE);
+
+            if (this->blackKingMoved || this->blackCastleMoved) return false;
+            if (kingSide) {
+                if (this->blackRookH8Moved) return false;
+                if (occupied & (0x6000000000000000ULL)) return false;
+                if (BitBoard::isSquareAttacked(0x6000000000000000ULL, attacked)) return false;
+            } else {
+                if (this->blackRookA8Moved) return false;
+                if (occupied & (0xE00000000000000ULL)) return false;
+                if (BitBoard::isSquareAttacked(0xE00000000000000ULL, attacked)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    void markFirstMove(Piece* selectedPiece) {
+        if (selectedPiece->getPieceType() == PieceType::KING) {
+            if (selectedPiece->getPieceColor() == PieceColor::WHITE_PIECE) {
+                this->whiteKingMoved = true;
+            } else {
+                this->blackKingMoved = true;
+            }
+        } else if (selectedPiece->getPieceType() == PieceType::ROOK) {
+            int x = selectedPiece->getPositionX() / 100;
+            int y = selectedPiece->getPositionY() / 100;
+
+            if (x == 0 && y == 0) {
+                this->blackRookA8Moved = true;
+            } else if (x == 0 && y == 7) {
+                this->blackRookH8Moved = true;
+            } else if (x == 7 && y == 0) {
+                this->whiteRookA1Moved = true;
+            } else if (x == 7 && y == 7) {
+                this->whiteRookH1Moved = true;
+            }
+        }
+    }
+
+
+public:
+
+    bool whiteKingMoved = false;
+    bool blackKingMoved = false;
+    bool whiteRookA1Moved = false;
+    bool whiteRookH1Moved = false;
+    bool blackRookA8Moved = false;
+    bool blackRookH8Moved = false;
+    bool whiteCastleMoved = false;
+    bool blackCastleMoved = false;
+
+    Bitboard kingCastleMove = 0ULL;
+    Bitboard queenCastleMove = 0ULL;
+
+    std::unordered_map<PieceColor, std::vector<Piece*>> teams;
+
 private:
     Bitboard whitePawns = 0x00FF000000000000ULL;
     Bitboard blackPawns = 0x000000000000FF00ULL;
@@ -228,6 +317,7 @@ private:
     Bitboard enPassantMove = 0LL;
 
     std::stack<MoveElement> moveHistory;
+
 
     bool isCheck;
     bool isCheckmate;

@@ -120,7 +120,6 @@ public:
         this->buildValidMoves();
     }
 
-
 protected:
 
     virtual void buildValidMoves() = 0;

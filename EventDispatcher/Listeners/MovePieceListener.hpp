@@ -19,13 +19,24 @@ class MovePieceListener : public EventListenerInterface {
                     auto indicators = this->board->getIndicators();
 
                     for (const auto& indicator: indicators) {
-                        if (indicator->validateBounds(mousePosition) &&
-                            indicator->getMoveOption() == MoveOptions::Move) {
-                            this->board->move(
-                                    selectedPiece,
-                                    indicator->getPositionX(),
-                                    indicator->getPositionY()
-                            );
+                        if (indicator->validateBounds(mousePosition)) {
+                            if (indicator->getMoveOption() == MoveOptions::Move) {
+                                this->gameState->markFirstMove(selectedPiece);
+                                this->board->move(
+                                        selectedPiece,
+                                        indicator->getPositionX(),
+                                        indicator->getPositionY()
+                                );
+                            } else if (
+                                    indicator->getMoveOption() == MoveOptions::KING_SIDE_CASTLE ||
+                                    indicator->getMoveOption() == MoveOptions::QUEEN_SIDE_CASTLE
+                                    ) {
+
+                                this->board->castle(
+                                        indicator->getMoveOption(),
+                                        selectedPiece->getPieceColor()
+                                );
+                            }
                         }
                     }
                 }

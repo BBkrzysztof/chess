@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base/Piece.hpp"
+#include "../Assets/Container.hpp"
 
 class King : public Piece {
 public:
@@ -34,4 +35,6 @@ protected:
         this->validMoves = moves;
 
     }
+
+
 };

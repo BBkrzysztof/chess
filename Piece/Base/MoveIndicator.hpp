@@ -4,10 +4,13 @@
 
 sf::Color gray(176, 196, 222);
 sf::Color capture(250, 245, 160);
+sf::Color castle(173, 216, 230);
 
 enum MoveOptions {
     Move = 1,
     Capture = 2,
+    QUEEN_SIDE_CASTLE = 3,
+    KING_SIDE_CASTLE = 4,
 };
 
 class MoveIndicator {
@@ -22,7 +25,11 @@ public:
             this->circleShape.setPosition(x * 100 + 25, y * 100 + 25);
         } else {
             this->circleShape.setRadius(50);
-            this->circleShape.setFillColor(capture);
+            if (option == MoveOptions::QUEEN_SIDE_CASTLE || option == MoveOptions::KING_SIDE_CASTLE) {
+                this->circleShape.setFillColor(castle);
+            } else {
+                this->circleShape.setFillColor(capture);
+            }
             this->circleShape.setPosition(x * 100, y * 100);
         }
         this->moveOption = option;

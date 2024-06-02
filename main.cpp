@@ -27,6 +27,7 @@ int main() {
 
     Container::buildContainer(board, gameState, &window);
 
+
     EventDispatcher::registerListener(
             sf::Event::Closed,
             new CloseWindowListener

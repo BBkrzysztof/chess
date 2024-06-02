@@ -15,6 +15,8 @@ class CapturePieceListener : public EventListenerInterface {
                     for (const auto& indicator: indicators) {
                         if (indicator->validateBounds(mousePosition) &&
                             indicator->getMoveOption() == MoveOptions::Capture) {
+                            this->gameState->markFirstMove(selectedPiece);
+
                             this->board->capture(
                                     indicator->getPositionX(),
                                     indicator->getPositionY()

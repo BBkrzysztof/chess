@@ -23,10 +23,13 @@ class SelectPieceListener : public EventListenerInterface {
                             this->board->clearIndicators();
                         } else {
                             this->board->setSelectedPiece(element.first);
+                            this->gameState->kingCastleMove = 0ULL;
+                            this->gameState->queenCastleMove = 0ULL;
 
                             auto selectedPiece = this->board->getSelectedPieceReference();
                             selectedPiece->rebuildValidMoves();
                             Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
+                            this->checkCastle(selectedPiece);
 
                             Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
                                     selectedPiece->getPieceColor()
@@ -34,12 +37,45 @@ class SelectPieceListener : public EventListenerInterface {
 
                             captureMoves = captureMoves | this->gameState->getEnPassantMove();
 
-                            this->board->drawValidMoves(validMoves, captureMoves);
+                            this->board->drawValidMoves(
+                                    validMoves,
+                                    captureMoves,
+                                    this->gameState->kingCastleMove,
+                                    this->gameState->queenCastleMove
+                            );
+
                             this->gameState->setEnPassantMove(0LL);
+                            this->gameState->kingCastleMove = 0ULL;
+                            this->gameState->queenCastleMove = 0ULL;
                         }
                     }
                 }
             }
         }
+    }
+
+    void checkCastle(Piece* selectedPiece) {
+        if (selectedPiece->getPieceType() != PieceType::KING) {
+            this->gameState->kingCastleMove = 0ULL;
+            this->gameState->queenCastleMove = 0ULL;
+            return;
+        }
+
+        int i = BitBoard::calcShift(selectedPiece->getPositionX() / 100, selectedPiece->getPositionY() / 100);
+        Bitboard castle = 1ULL << i;
+
+        bool isWhite = selectedPiece->getPieceColor() == PieceColor::WHITE_PIECE;
+
+        bool kingSideCastle = this->gameState->canCastle(isWhite, true);
+        bool queenSideCastle = this->gameState->canCastle(isWhite, false);
+
+        if (kingSideCastle) {
+            this->gameState->kingCastleMove = (castle << 2);
+        }
+
+        if (queenSideCastle) {
+            this->gameState->queenCastleMove = (castle >> 2);
+        }
+
     }
 };
