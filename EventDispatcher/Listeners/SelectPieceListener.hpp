@@ -28,8 +28,10 @@ class SelectPieceListener : public EventListenerInterface {
 
                             auto selectedPiece = this->board->getSelectedPieceReference();
                             selectedPiece->rebuildValidMoves();
-                            Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
+                            Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied() &
+                                                  ~this->gameState->promotionMove;
                             this->checkCastle(selectedPiece);
+                            this->checkPromotion(selectedPiece);
 
                             Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
                                     selectedPiece->getPieceColor()
@@ -41,7 +43,8 @@ class SelectPieceListener : public EventListenerInterface {
                                     validMoves,
                                     captureMoves,
                                     this->gameState->kingCastleMove,
-                                    this->gameState->queenCastleMove
+                                    this->gameState->queenCastleMove,
+                                    this->gameState->promotionMove
                             );
 
                             this->gameState->setEnPassantMove(0LL);
@@ -52,6 +55,26 @@ class SelectPieceListener : public EventListenerInterface {
                 }
             }
         }
+    }
+
+    void checkPromotion(Piece* selectedPiece) {
+        this->gameState->promotionMove = 0ULL;
+
+        if (selectedPiece->getPieceType() != PieceType::PAWN) {
+            return;
+        }
+
+        Bitboard ROW_0 = 0x00000000000000FFULL;
+        Bitboard ROW_7 = 0xFF00000000000000ULL;
+
+        Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
+
+        if (selectedPiece->getPieceColor() == PieceColor::WHITE_PIECE) {
+            this->gameState->promotionMove = (ROW_0 & validMoves);
+            return;
+        }
+
+        this->gameState->promotionMove = (ROW_7 & validMoves);
     }
 
     void checkCastle(Piece* selectedPiece) {

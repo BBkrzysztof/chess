@@ -214,6 +214,53 @@ public:
         this->setSelectedPiece("");
     }
 
+    void promote(Piece* selectedPiece, PieceType type) {
+        int oldX = selectedPiece->getPositionX() / 100;
+        int oldY = selectedPiece->getPositionY() / 100;
+
+        auto result = std::find_if(
+                this->pieces.begin(),
+                this->pieces.end(),
+                [oldX, oldY](const std::pair<std::string, Piece*>& element) {
+                    return element.second->getPositionX() == oldX * 100 && element.second->getPositionY() == oldY * 100;
+                }
+        );
+
+        Bitboard current = this->gameState->getBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor()
+        );
+
+        Bitboard newBitBoard = BitBoard::capture(current, BitBoard::calcShift(oldX, oldY));
+
+        this->gameState->updateBitBoard(
+                selectedPiece->getPieceType(),
+                selectedPiece->getPieceColor(),
+                newBitBoard
+        );
+
+        Piece* queen = new Queen(
+                selectedPiece->getPieceColor(),
+                selectedPiece->getPositionX() / 100,
+                selectedPiece->getPositionY() / 100
+        );
+
+        Bitboard target = this->gameState->getBitBoard(
+                PieceType::QUEEN,
+                selectedPiece->getPieceColor()
+        );
+
+        BitBoard::insert(
+                target,
+                BitBoard::calcShift(
+                        selectedPiece->getPositionX() / 100,
+                        selectedPiece->getPositionY() / 100
+                )
+        );
+        this->gameState->updateBitBoard(PieceType::QUEEN, selectedPiece->getPieceColor(), target);
+        this->pieces[selectedPiece->getHash()] = queen;
+    }
+
     void capture(int oldX, int oldY) {
 
         auto result = std::find_if(
@@ -277,7 +324,8 @@ public:
             const Bitboard& validMoves,
             const Bitboard& captureMoves,
             const Bitboard& kingSideCastle,
-            const Bitboard& queenSideCastle
+            const Bitboard& queenSideCastle,
+            const Bitboard& promotions
     ) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
@@ -285,26 +333,20 @@ public:
                     auto* mi = new MoveIndicator(file, rank);
                     this->indicators.push_back(mi);
                 }
-            }
-        }
-
-        for (int rank = 7; rank >= 0; --rank) {
-            for (int file = 0; file < 8; ++file) {
                 if (captureMoves & (1ULL << BitBoard::calcShift(file, rank))) {
                     auto* mi = new MoveIndicator(file, rank, MoveOptions::Capture);
                     this->indicators.push_back(mi);
                 }
-            }
-        }
-
-        for (int rank = 7; rank >= 0; --rank) {
-            for (int file = 0; file < 8; ++file) {
                 if (kingSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
                     auto* mi = new MoveIndicator(file, rank, MoveOptions::KING_SIDE_CASTLE);
                     this->indicators.push_back(mi);
                 }
                 if (queenSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
                     auto* mi = new MoveIndicator(file, rank, MoveOptions::QUEEN_SIDE_CASTLE);
+                    this->indicators.push_back(mi);
+                }
+                if (promotions & (1ULL << BitBoard::calcShift(file, rank))) {
+                    auto* mi = new MoveIndicator(file, rank, MoveOptions::PROMOTION);
                     this->indicators.push_back(mi);
                 }
             }

@@ -26,7 +26,13 @@ public:
     }
 
     static Bitboard moveOnBitBoard(Bitboard bitboard, int from, int to) {
-        bitboard &= ~(1ULL << from);
+        bitboard = BitBoard::capture(bitboard, from);
+        bitboard = BitBoard::insert(bitboard, to);
+
+        return bitboard;
+    }
+
+    static Bitboard insert(Bitboard bitboard, int to) {
         bitboard |= (1ULL << to);
 
         return bitboard;

@@ -290,6 +290,7 @@ public:
 
     Bitboard kingCastleMove = 0ULL;
     Bitboard queenCastleMove = 0ULL;
+    Bitboard promotionMove = 0ULL;
 
     std::unordered_map<PieceColor, std::vector<Piece*>> teams;
 

@@ -9,10 +9,9 @@
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 #include "Assets/Container.hpp"
 /**
- * @todo check-mate stalemate
- * @todo promocja figury
- * @todo roszada
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
+ * @todo promocja figury
+ * @todo check-mate stalemate
  * @return
  */
 

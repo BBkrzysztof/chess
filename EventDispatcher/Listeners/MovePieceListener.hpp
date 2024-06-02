@@ -27,6 +27,8 @@ class MovePieceListener : public EventListenerInterface {
                                         indicator->getPositionX(),
                                         indicator->getPositionY()
                                 );
+                            } else if (indicator->getMoveOption() == MoveOptions::PROMOTION) {
+                                this->board->promote(selectedPiece, PieceType::QUEEN);
                             } else if (
                                     indicator->getMoveOption() == MoveOptions::KING_SIDE_CASTLE ||
                                     indicator->getMoveOption() == MoveOptions::QUEEN_SIDE_CASTLE

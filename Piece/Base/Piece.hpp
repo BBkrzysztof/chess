@@ -57,6 +57,8 @@ public:
         this->resetPosition();
     }
 
+    ~Piece() = default;
+
     void draw(sf::RenderTarget& target) {
         if (this->selected) {
             target.draw(this->background);
