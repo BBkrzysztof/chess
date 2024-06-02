@@ -71,11 +71,15 @@ protected:
             }
             // Bicie w lewo i prawo
             if (i % 8 != 0 && i / 8 != 0) {
+                this->isValidEnPassantMove(lastMove, (bitboard >> 9));
+
                 if (captures & (bitboard >> 9)) {
                     moves |= bitboard >> 9;
                 }
             }
             if (i % 8 != 7 && i / 8 != 0) {
+                this->isValidEnPassantMove(lastMove, (bitboard >> 7));
+
                 if (captures & (bitboard >> 7)) {
                     moves |= bitboard >> 7;
                 }

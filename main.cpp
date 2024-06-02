@@ -13,7 +13,6 @@
  * @todo promocja figury
  * @todo roszada
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
- * @todo bice w przelocie
  * @return
  */
 
