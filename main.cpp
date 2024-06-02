@@ -8,7 +8,14 @@
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 #include "Assets/Container.hpp"
-
+/**
+ * @todo check-mate stalemate
+ * @todo promocja figury
+ * @todo roszada
+ * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
+ * @todo bice w przelocie
+ * @return
+ */
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Board");

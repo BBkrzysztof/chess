@@ -1,9 +1,35 @@
 #pragma once
 
+#include <stack>
+
 #include "../Board/board.hpp"
 #include "../Assets/BitBoard.hpp"
+#include "../Piece/Base/MoveIndicator.hpp"
+#include "../Assets/BitBoard.hpp"
+
+class Move {
+public:
+    int from;
+    int to;
+    MoveOptions moveOptions;
+    PieceColor color;
+    PieceType type;
+    Piece* piece;
+
+    Move() = default;
+
+    Move(
+            int from,
+            int to,
+            MoveOptions options,
+            PieceColor color,
+            PieceType type,
+            Piece* piece
+    ) : from(from), to(to), moveOptions(options), color(color), type(type), piece(piece) {};
+};
 
 typedef uint64_t Bitboard;
+typedef class Move MoveElement;
 
 class GameState {
 
@@ -22,7 +48,20 @@ public:
         return whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueen;
     }
 
-    void updateBitBoard(const PieceType& type, const PieceColor& color, const Bitboard& newValue) {
+    void updateHistory(
+            int from,
+            int to,
+            MoveOptions options,
+            Piece* piece
+    ) {
+        this->moveHistory.emplace(from, to, options, piece->getPieceColor(), piece->getPieceType(), piece);
+    }
+
+    void updateBitBoard(
+            const PieceType& type,
+            const PieceColor& color,
+            const Bitboard& newValue
+    ) {
         switch (type) {
             case PieceType::PAWN:
                 color == PieceColor::WHITE_PIECE ? this->whitePawns = newValue : this->blackPawns = newValue;
@@ -125,6 +164,46 @@ public:
                                               : this->turn = PieceColor::WHITE_PIECE;
     }
 
+    bool getIsCheck() const {
+        return this->isCheck;
+    }
+
+    bool getIsCheckMate() const {
+        return this->isCheckmate;
+    }
+
+    bool getIsStalemate() const {
+        return this->isStalemate;
+    }
+
+    void setIsCheck(bool value) {
+        this->isCheck = value;
+    }
+
+    void setIsCheckMate(bool value) {
+        this->isCheckmate = value;
+    }
+
+    void setIsStalemate(bool value) {
+        this->isStalemate = value;
+    }
+
+    Bitboard getEnPassantMove() const {
+        return this->enPassantMove;
+    }
+
+    void setEnPassantMove(Bitboard move) {
+        this->enPassantMove = move;
+    }
+
+    MoveElement* peekHistory() {
+        if (this->moveHistory.empty()) {
+            return nullptr;
+        }
+
+        return &this->moveHistory.top();
+    }
+
 private:
     Bitboard whitePawns = 0x00FF000000000000ULL;
     Bitboard blackPawns = 0x000000000000FF00ULL;
@@ -146,5 +225,14 @@ private:
 
     PieceColor turn = PieceColor::WHITE_PIECE;
 
+    Bitboard enPassantMove = 0LL;
+
+    std::stack<MoveElement> moveHistory;
+
+    bool isCheck;
+    bool isCheckmate;
+    bool isStalemate;
+
     friend class board;
+
 };

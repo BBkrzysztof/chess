@@ -21,7 +21,6 @@ class SelectPieceListener : public EventListenerInterface {
                         if (this->board->getSelectedPiece() == element.first) {
                             this->board->setSelectedPiece("");
                             this->board->clearIndicators();
-                            this->board->resetBeatable();
                         } else {
                             this->board->setSelectedPiece(element.first);
 
@@ -29,12 +28,14 @@ class SelectPieceListener : public EventListenerInterface {
                             selectedPiece->rebuildValidMoves();
                             Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
 
-
                             Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
                                     selectedPiece->getPieceColor()
                             );
 
+                            captureMoves = captureMoves | this->gameState->getEnPassantMove();
+
                             this->board->drawValidMoves(validMoves, captureMoves);
+                            this->gameState->setEnPassantMove(0LL);
                         }
                     }
                 }

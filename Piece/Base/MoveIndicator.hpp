@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 sf::Color gray(176, 196, 222);
+sf::Color capture(250, 245, 160);
 
 enum MoveOptions {
     Move = 1,
@@ -15,17 +16,20 @@ public:
         this->positionX = x;
         this->positionY = y;
 
-        this->circleShape.setRadius(25);
-        this->circleShape.setFillColor(gray);
-        this->circleShape.setPosition(x * 100 + 25, y * 100 + 25);
-
+        if (option == MoveOptions::Move) {
+            this->circleShape.setRadius(25);
+            this->circleShape.setFillColor(gray);
+            this->circleShape.setPosition(x * 100 + 25, y * 100 + 25);
+        } else {
+            this->circleShape.setRadius(50);
+            this->circleShape.setFillColor(capture);
+            this->circleShape.setPosition(x * 100, y * 100);
+        }
         this->moveOption = option;
     };
 
     void draw(sf::RenderTarget& target) {
-        if (this->moveOption == MoveOptions::Move) {
-            target.draw(this->circleShape);
-        }
+        target.draw(this->circleShape);
     }
 
     bool validateBounds(const sf::Vector2i& mousePosition) {

@@ -4,6 +4,8 @@
 #include <map>
 #include <iostream>
 
+#include "../../Assets/BitBoard.hpp"
+
 const std::string PATH = "../Piece/icons/";
 
 sf::Color bgColor(255, 240, 170);
@@ -51,9 +53,6 @@ public:
         this->background.setSize(sf::Vector2f(100, 100));
         this->background.setFillColor(bgColor);
 
-        this->circleShape.setRadius(50);
-        this->circleShape.setFillColor(bgColor);
-
         this->sprite.setTexture(this->texture);
         this->resetPosition();
     }
@@ -61,10 +60,6 @@ public:
     void draw(sf::RenderTarget& target) {
         if (this->selected) {
             target.draw(this->background);
-        }
-
-        if (this->beatable) {
-            target.draw(this->circleShape);
         }
 
         target.draw(this->sprite);
@@ -89,14 +84,6 @@ public:
         this->selected = false;
     }
 
-    void selectBeatable() {
-        this->beatable = true;
-    }
-
-    void unSelectBeatable() {
-        this->beatable = false;
-    }
-
     PieceColor getPieceColor() const {
         return this->pieceColor;
     }
@@ -114,9 +101,7 @@ public:
     }
 
     Bitboard getValidMoves() {
-        int row = (this->positionY / 100) * 8;
-        int shift = row + (this->positionX / 100);
-        return this->validMoves[shift];
+        return this->validMoves;
     }
 
     bool operator==(const Piece& other) {
@@ -171,7 +156,7 @@ private:
     }
 
 protected:
-    Bitboard validMoves[64];
+    Bitboard validMoves;
 
 private:
     int positionX = 0;

@@ -10,27 +10,28 @@ public:
     };
 
 protected:
-    void buildValidMoves() final{
-        for (int i = 0; i < 64; i++) {
-            Bitboard bitboard = 1ULL << i;
-            Bitboard moves = 0ULL;
+    void buildValidMoves() final {
+        int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
 
-            if (i % 8 != 0) {
-                moves |= bitboard << 7;
-                moves |= bitboard >> 9;
-                moves |= bitboard >> 1;
-                moves |= bitboard << 9;
-            }
-            if (i % 8 != 7) {
-                moves |= bitboard << 9;
-                moves |= bitboard >> 7;
-                moves |= bitboard << 1;
-                moves |= bitboard >> 9;
-            }
-            moves |= bitboard << 8;
-            moves |= bitboard >> 8;
+        Bitboard bitboard = 1ULL << i;
+        Bitboard moves = 0ULL;
 
-            this->validMoves[i] = moves;
+        if (i % 8 != 0) {
+            moves |= bitboard << 7;
+            moves |= bitboard >> 9;
+            moves |= bitboard >> 1;
+            moves |= bitboard << 9;
         }
+        if (i % 8 != 7) {
+            moves |= bitboard << 9;
+            moves |= bitboard >> 7;
+            moves |= bitboard << 1;
+            moves |= bitboard >> 9;
+        }
+        moves |= bitboard << 8;
+        moves |= bitboard >> 8;
+
+        this->validMoves = moves;
+
     }
 };

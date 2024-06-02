@@ -22,12 +22,11 @@ class CapturePieceListener : public EventListenerInterface {
                             this->board->move(
                                     selectedPiece,
                                     indicator->getPositionX(),
-                                    indicator->getPositionY()
+                                    indicator->getPositionY(),
+                                    true
                             );
-
                         }
                     }
-
                 }
             }
         }

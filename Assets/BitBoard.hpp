@@ -47,4 +47,12 @@ public:
 
         return y * 8 + x;
     }
+
+    static bool matchBitboard(Bitboard bitboard, int shift) {
+        Bitboard d = 0LL << shift;
+        BitBoard::dump(d, "shift");
+        BitBoard::dump(bitboard, "org");
+
+        return (bitboard & (d));
+    }
 };
