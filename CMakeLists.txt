@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.24)
 project(chess)
 
 set(CMAKE_CXX_STANDARD 14)
-
-add_executable(chess main.cpp)
+set(HEADER_FILES Board/board.h)
+add_executable(chess main.cpp Board/board.h)
 
 set(SFML_STATIC_LIBRARIES TRUE)
 set(SFML_DIR C:/SFML/lib/cmake/SFML)

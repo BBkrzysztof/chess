@@ -3,12 +3,12 @@
 #include <stack>
 #include <algorithm>
 
-#include "../Board/board.hpp"
+#include "../Board/board.cpp"
 #include "../Assets/BitBoard.hpp"
 #include "../Piece/Base/MoveIndicator.hpp"
 #include "../Assets/BitBoard.hpp"
 
-class Move {
+class Movee {
 public:
     int from;
     int to;
@@ -17,9 +17,9 @@ public:
     PieceType type;
     Piece* piece;
 
-    Move() = default;
+    Movee() = default;
 
-    Move(
+    Movee(
             int from,
             int to,
             MoveOptions options,
@@ -30,7 +30,7 @@ public:
 };
 
 typedef uint64_t Bitboard;
-typedef class Move MoveElement;
+typedef class Movee MoveElement;
 
 class GameState {
 
@@ -296,6 +296,11 @@ public:
 
         targetVector.erase(result);
         this->teams.at(color) = targetVector;
+    }
+
+    void addToTeam(Piece* selectedPiece) {
+        auto color = selectedPiece->getPieceColor();
+        this->teams.at(color).push_back(selectedPiece);
     }
 
 public:

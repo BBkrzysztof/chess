@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../GameState/GameState.hpp"
-#include "../Board/board.hpp"
+#include "../Board/board.h"
 
 class Board;
 
@@ -17,8 +16,8 @@ public:
         Container::window = window;
     }
 
-    static void setGameSate(GameState* gameState){
-        Container::gameState=gameState;
+    static void setGameSate(GameState* gameState) {
+        Container::gameState = gameState;
     }
 
     static Board* getBoard() {

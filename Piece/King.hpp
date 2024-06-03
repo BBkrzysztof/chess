@@ -10,20 +10,17 @@ public:
         this->buildValidMoves();
     };
 
-protected:
-    void buildValidMoves() final {
-        int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
-
-        Bitboard bitboard = 1ULL << i;
+    static Bitboard getValidMoves(int position, Bitboard occupied) {
+        Bitboard bitboard = 1ULL << position;
         Bitboard moves = 0ULL;
 
-        if (i % 8 != 0) {
+        if (position % 8 != 0) {
             moves |= bitboard << 7;
             moves |= bitboard >> 9;
             moves |= bitboard >> 1;
             moves |= bitboard << 9;
         }
-        if (i % 8 != 7) {
+        if (position % 8 != 7) {
             moves |= bitboard << 9;
             moves |= bitboard >> 7;
             moves |= bitboard << 1;
@@ -32,8 +29,17 @@ protected:
         moves |= bitboard << 8;
         moves |= bitboard >> 8;
 
-        this->validMoves = moves;
+        return moves;
+    }
 
+
+protected:
+    void buildValidMoves() final {
+        Bitboard occupied = Container::getGameState()->calcOccupied();
+
+        int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
+
+        this->validMoves = King::getValidMoves(i, occupied);
     }
 
 

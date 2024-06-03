@@ -8,6 +8,9 @@
 #include "../EventListenerInterface.hpp"
 #include "../../Assets/BitBoard.hpp"
 #include "../../Assets/PopUp.hpp"
+#include "../../Moves/Move.hpp"
+#include "../../Moves/Promote.hpp"
+#include "../../Moves/Castle.hpp"
 
 class MovePieceListener : public EventListenerInterface {
     void onEvent(sf::Event event) final {
@@ -16,35 +19,32 @@ class MovePieceListener : public EventListenerInterface {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(*this->window);
                     auto selectedPiece = this->board->getSelectedPieceReference();
-
                     auto indicators = this->board->getIndicators();
+
+                    MoveInstruction instruction;
+                    instruction.board = this->board;
+                    instruction.gameState = this->gameState;
+                    instruction.selectedPiece = selectedPiece;
 
                     for (const auto& indicator: indicators) {
                         if (indicator->validateBounds(mousePosition)) {
                             if (indicator->getMoveOption() == MoveOptions::Move) {
                                 this->gameState->markFirstMove(selectedPiece);
-                                this->board->move(
-                                        selectedPiece,
-                                        indicator->getPositionX(),
-                                        indicator->getPositionY()
-                                );
+                                instruction.newX = indicator->getPositionX();
+                                instruction.newY = indicator->getPositionY();
+
+                                Move::move(instruction);
                             } else if (indicator->getMoveOption() == MoveOptions::PROMOTION) {
-                                auto selectedPieceType = PopUp(selectedPiece->getPieceColor()).draw();
-                                this->board->promote(
-                                        selectedPiece,
-                                        selectedPieceType,
-                                        indicator->getPositionX(),
-                                        indicator->getPositionY()
-                                );
+                                instruction.newX = indicator->getPositionX();
+                                instruction.newY = indicator->getPositionY();
+                                instruction.selectedType = PopUp(selectedPiece->getPieceColor()).draw();
+                                Promote::promote(instruction);
                             } else if (
                                     indicator->getMoveOption() == MoveOptions::KING_SIDE_CASTLE ||
                                     indicator->getMoveOption() == MoveOptions::QUEEN_SIDE_CASTLE
                                     ) {
-
-                                this->board->castle(
-                                        indicator->getMoveOption(),
-                                        selectedPiece->getPieceColor()
-                                );
+                                instruction.options = indicator->getMoveOption();
+                                Castle::castle(instruction);
                             }
                         }
                     }

@@ -6,7 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include "EventListenerInterface.hpp"
-#include "../Board/board.hpp"
+#include "../Board/board.cpp"
 #include "../GameState/GameState.hpp"
 #include "../Assets/Container.hpp"
 

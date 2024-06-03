@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Piece/Base/Piece.hpp"
-#include "Board/board.hpp"
+#include "Board/board.cpp"
 #include "EventDispatcher/EventDispatcher.hpp"
 #include "EventDispatcher/Listeners/CloseWindowListener.hpp"
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
@@ -11,7 +11,6 @@
 
 /**
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
- * @todo promocja figury
  * @todo check-mate stalemate
  * @return
  */
@@ -26,7 +25,6 @@ int main() {
     Board* board = new Board(gameState);
 
     Container::buildContainer(board, gameState, &window);
-
 
     EventDispatcher::registerListener(
             sf::Event::Closed,

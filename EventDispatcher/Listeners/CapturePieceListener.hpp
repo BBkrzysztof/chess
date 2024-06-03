@@ -2,6 +2,9 @@
 
 #include "../EventListenerInterface.hpp"
 #include "../../Assets/BitBoard.hpp"
+#include "../../Moves/Capture.hpp"
+#include "../../Moves/Move.hpp"
+#include "../../Moves/Promote.hpp"
 
 class CapturePieceListener : public EventListenerInterface {
     void onEvent(sf::Event event) final {
@@ -12,32 +15,34 @@ class CapturePieceListener : public EventListenerInterface {
                     auto indicators = this->board->getIndicators();
                     auto selectedPiece = this->board->getSelectedPieceReference();
 
+                    MoveInstruction instruction;
+                    instruction.board = this->board;
+                    instruction.gameState = this->gameState;
+                    instruction.selectedPiece = selectedPiece;
+
                     for (const auto& indicator: indicators) {
                         if (indicator->validateBounds(mousePosition) &&
                             (indicator->getMoveOption() == MoveOptions::Capture ||
                              indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION)) {
                             this->gameState->markFirstMove(selectedPiece);
+                            instruction.oldX = indicator->getPositionX();
+                            instruction.oldY = indicator->getPositionY();
+                            Capture::capture(instruction);
 
-                            this->board->capture(
-                                    indicator->getPositionX(),
-                                    indicator->getPositionY()
-                            );
 
                             if (indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
-                                auto selectedPieceType = PopUp(selectedPiece->getPieceColor()).draw();
-                                this->board->promote(
-                                        selectedPiece,
-                                        selectedPieceType,
-                                        indicator->getPositionX(),
-                                        indicator->getPositionY()
-                                );
+                                instruction.newX = indicator->getPositionX();
+                                instruction.newY = indicator->getPositionY();
+                                instruction.selectedType = PopUp(selectedPiece->getPieceColor()).draw();
+
+                                Promote::promote(instruction);
+
                             } else {
-                                this->board->move(
-                                        selectedPiece,
-                                        indicator->getPositionX(),
-                                        indicator->getPositionY(),
-                                        true
-                                );
+                                instruction.newX = indicator->getPositionX();
+                                instruction.newY = indicator->getPositionY();
+                                instruction.captured = true;
+                                Move::move(instruction);
+
                             }
                         }
                     }

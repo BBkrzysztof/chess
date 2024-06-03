@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "../Board/board.hpp"
+#include "../Board/board.cpp"
 #include "../GameState/GameState.hpp"
 #include "EventDispatcher.hpp"
 
