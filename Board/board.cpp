@@ -13,6 +13,14 @@ Board::Board(GameState* gameState) {
     this->registerKings();
 }
 
+Board::Board(const Board& board, GameState* gameStateCopy) {
+    this->gameState = gameStateCopy;
+    this->indicators = board.indicators;
+    this->pieces = board.pieces;
+    this->selectedPiece = board.selectedPiece;
+}
+
+
 void Board::draw(sf::RenderTarget& target) {
     // draw board
     for (int row = 0; row < 8; ++row) {

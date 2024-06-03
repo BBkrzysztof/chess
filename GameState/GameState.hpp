@@ -35,6 +35,42 @@ typedef class Movee MoveElement;
 class GameState {
 
 public:
+    GameState() = default;
+
+    GameState(const GameState& gameState) {
+        this->whiteKingMoved = gameState.whiteKingMoved;
+        this->blackKingMoved = gameState.blackKingMoved;
+        this->whiteRookA1Moved = gameState.whiteRookA1Moved;
+        this->whiteRookH1Moved = gameState.whiteRookH1Moved;
+        this->blackRookA8Moved = gameState.blackRookA8Moved;
+        this->blackRookH8Moved = gameState.blackRookH8Moved;
+        this->whiteCastleMoved = gameState.whiteCastleMoved;
+        this->blackCastleMoved = gameState.blackCastleMoved;
+        this->kingCastleMove = gameState.kingCastleMove;
+        this->queenCastleMove = gameState.queenCastleMove;
+        this->promotionMove = gameState.promotionMove;
+        this->captureAndPromotionMove = gameState.captureAndPromotionMove;
+        this->teams = gameState.teams;
+        this->whitePawns = gameState.whitePawns;
+        this->blackPawns = gameState.blackPawns;
+        this->whiteKnights = gameState.whiteKnights;
+        this->blackKnights = gameState.blackKnights;
+        this->whiteBishops = gameState.whiteBishops;
+        this->blackBishops = gameState.blackBishops;
+        this->whiteRooks = gameState.whiteRooks;
+        this->blackRooks = gameState.blackRooks;
+        this->whiteQueen = gameState.whiteQueen;
+        this->blackQueen = gameState.blackQueen;
+        this->whiteKing = gameState.whiteKing;
+        this->blackKing = gameState.blackKing;
+        this->turn = gameState.turn;
+        this->enPassantMove = gameState.enPassantMove;
+        this->moveHistory = gameState.moveHistory;
+        this->isCheck = gameState.isCheck;
+        this->isCheckmate = gameState.isCheckmate;
+        this->isStalemate = gameState.isStalemate;
+    }
+
     Bitboard calcOccupied() const {
         return whitePawns | blackPawns | whiteKnights | blackKnights |
                whiteBishops | blackBishops | whiteRooks | blackRooks | whiteQueen |

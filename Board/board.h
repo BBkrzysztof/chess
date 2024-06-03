@@ -34,6 +34,8 @@ class Board {
 public:
     Board(GameState* gameState);
 
+    Board(const Board& board, GameState* gameStateCopy);
+
     void draw(sf::RenderTarget& target);
 
     std::map<std::string, Piece*> getPieces();
