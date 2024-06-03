@@ -16,6 +16,8 @@
 #include "../Piece/Knight.hpp"
 #include "../Piece/Queen.hpp"
 #include "../Piece/Base/Piece.hpp"
+#include "../Piece/Factory/PieceFactory.hpp"
+#include "../Assets/Helper.hpp"
 
 typedef uint64_t Bitboard;
 
@@ -102,7 +104,6 @@ public:
                 selectedPiece->getPieceColor(),
                 newBitBoard
         );
-
 
         this->gameState->updateHistory(
                 BitBoard::calcShift(oldX, oldY),
@@ -214,17 +215,9 @@ public:
         this->setSelectedPiece("");
     }
 
-    void promote(Piece* selectedPiece, PieceType type) {
+    void promote(Piece* selectedPiece, PieceType type, int newX, int newY) {
         int oldX = selectedPiece->getPositionX() / 100;
         int oldY = selectedPiece->getPositionY() / 100;
-
-        auto result = std::find_if(
-                this->pieces.begin(),
-                this->pieces.end(),
-                [oldX, oldY](const std::pair<std::string, Piece*>& element) {
-                    return element.second->getPositionX() == oldX * 100 && element.second->getPositionY() == oldY * 100;
-                }
-        );
 
         Bitboard current = this->gameState->getBitBoard(
                 selectedPiece->getPieceType(),
@@ -239,26 +232,34 @@ public:
                 newBitBoard
         );
 
-        Piece* queen = new Queen(
+        Piece* piece = PieceFactory::create(
+                type,
                 selectedPiece->getPieceColor(),
                 selectedPiece->getPositionX() / 100,
                 selectedPiece->getPositionY() / 100
         );
 
+        piece->setHash(selectedPiece->getHash());
+
         Bitboard target = this->gameState->getBitBoard(
-                PieceType::QUEEN,
+                type,
                 selectedPiece->getPieceColor()
         );
 
-        BitBoard::insert(
+        target = BitBoard::insert(
                 target,
                 BitBoard::calcShift(
                         selectedPiece->getPositionX() / 100,
                         selectedPiece->getPositionY() / 100
                 )
         );
-        this->gameState->updateBitBoard(PieceType::QUEEN, selectedPiece->getPieceColor(), target);
-        this->pieces[selectedPiece->getHash()] = queen;
+
+        this->gameState->updateBitBoard(type, selectedPiece->getPieceColor(), target);
+        this->gameState->removeFromTeam(selectedPiece);
+        this->gameState->teams.at(selectedPiece->getPieceColor()).push_back(piece);
+        this->pieces[selectedPiece->getHash()] = piece;
+
+        this->move(piece, newX, newY);
     }
 
     void capture(int oldX, int oldY) {
@@ -270,12 +271,16 @@ public:
                     return element.second->getPositionX() == oldX * 100 && element.second->getPositionY() == oldY * 100;
                 }
         );
-        Piece* selectedPiece;
+        Piece* selectedPiece = nullptr;
 
         if (result != this->pieces.end()) {
             selectedPiece = result->second;
         } else {
             selectedPiece = this->gameState->peekHistory()->piece;
+        }
+
+        if (selectedPiece == nullptr) {
+            throw std::exception();
         }
 
         Bitboard current = this->gameState->getBitBoard(
@@ -285,8 +290,6 @@ public:
 
         this->gameState->markFirstMove(selectedPiece);
 
-        auto element = this->pieces.find(selectedPiece->getHash());
-        this->pieces.erase(element);
 
         Bitboard newBitBoard = BitBoard::capture(current, BitBoard::calcShift(oldX, oldY));
 
@@ -296,6 +299,9 @@ public:
                 newBitBoard
         );
 
+        auto element = this->pieces.find(selectedPiece->getHash());
+        this->pieces.erase(element);
+        this->gameState->removeFromTeam(selectedPiece);
         delete selectedPiece;
     }
 
@@ -325,7 +331,8 @@ public:
             const Bitboard& captureMoves,
             const Bitboard& kingSideCastle,
             const Bitboard& queenSideCastle,
-            const Bitboard& promotions
+            const Bitboard& promotions,
+            const Bitboard& captureAndPromotion
     ) {
         for (int rank = 7; rank >= 0; --rank) {
             for (int file = 0; file < 8; ++file) {
@@ -349,6 +356,10 @@ public:
                     auto* mi = new MoveIndicator(file, rank, MoveOptions::PROMOTION);
                     this->indicators.push_back(mi);
                 }
+                if (captureAndPromotion & (1ULL << BitBoard::calcShift(file, rank))) {
+                    auto* mi = new MoveIndicator(file, rank, MoveOptions::CAPTURE_AND_PROMOTION);
+                    this->indicators.push_back(mi);
+                }
             }
         }
     }
@@ -357,7 +368,7 @@ public:
         auto color = Container::getGameState()->getTurn();
         bool isEnemyWhite = color == PieceColor::WHITE_PIECE;
 
-        Bitboard attacks = Container::getGameState()->getAttackedSquares(
+        Bitboard attacks = this->gameState->getAttackedSquares(
                 isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
 
         Bitboard kingPosition = Container::getGameState()->getBitBoard(PieceType::KING, color);
@@ -378,16 +389,8 @@ public:
 
     }
 
-private:
 
-    static std::string pieceKey(Piece* piece) {
-        static int id = 0;
-        std::stringstream s;
-        s << piece->getPieceType() << "-" << piece->getPieceColor() << "-" << id;
-        piece->setHash(s.str());
-        id += 1;
-        return s.str();
-    }
+private:
 
     void registerPawns() {
         Board::registerPiecesGroup([this](const int& x, const int& y) {
@@ -490,7 +493,7 @@ private:
     }
 
     void registerPiece(Piece* piece, std::string key = "") {
-        auto pieceKey = key.empty() ? Board::pieceKey(piece) : key;
+        auto pieceKey = key.empty() ? Helper::getHash(piece) : key;
         this->pieces[pieceKey] = piece;
     }
 

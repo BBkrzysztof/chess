@@ -13,6 +13,7 @@ enum MoveOptions {
     QUEEN_SIDE_CASTLE = 3,
     KING_SIDE_CASTLE = 4,
     PROMOTION = 5,
+    CAPTURE_AND_PROMOTION = 6,
 };
 
 class MoveIndicator {

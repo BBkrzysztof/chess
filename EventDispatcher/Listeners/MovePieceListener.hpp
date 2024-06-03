@@ -7,6 +7,7 @@
 
 #include "../EventListenerInterface.hpp"
 #include "../../Assets/BitBoard.hpp"
+#include "../../Assets/PopUp.hpp"
 
 class MovePieceListener : public EventListenerInterface {
     void onEvent(sf::Event event) final {
@@ -28,7 +29,13 @@ class MovePieceListener : public EventListenerInterface {
                                         indicator->getPositionY()
                                 );
                             } else if (indicator->getMoveOption() == MoveOptions::PROMOTION) {
-                                this->board->promote(selectedPiece, PieceType::QUEEN);
+                                auto selectedPieceType = PopUp(selectedPiece->getPieceColor()).draw();
+                                this->board->promote(
+                                        selectedPiece,
+                                        selectedPieceType,
+                                        indicator->getPositionX(),
+                                        indicator->getPositionY()
+                                );
                             } else if (
                                     indicator->getMoveOption() == MoveOptions::KING_SIDE_CASTLE ||
                                     indicator->getMoveOption() == MoveOptions::QUEEN_SIDE_CASTLE

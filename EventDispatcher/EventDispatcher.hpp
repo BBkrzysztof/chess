@@ -32,24 +32,17 @@ class EventDispatcher {
 public:
 
     static void dispatch(const sf::Event& event) {
-        auto d = Container::getGameState();
+        auto rlisteners = EventDispatcher::listeners[event.type];
+        while (!rlisteners.empty()) {
+            auto listener = rlisteners.top();
+            listener.listenerInterface->setContext(
+                    Container::getBoard(),
+                    Container::getGameState(),
+                    Container::getWindow()
+            );
 
-        try {
-            auto rlisteners = EventDispatcher::listeners.at(event.type);
-            while (!rlisteners.empty()) {
-                auto listener = rlisteners.top();
-                listener.listenerInterface->setContext(
-                        Container::getBoard(),
-                        Container::getGameState(),
-                        Container::getWindow()
-                );
-
-                listener.listenerInterface->onEvent(event);
-                rlisteners.pop();
-            }
-
-        } catch (std::out_of_range& range) {
-            return;
+            listener.listenerInterface->onEvent(event);
+            rlisteners.pop();
         }
     }
 

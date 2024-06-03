@@ -14,19 +14,31 @@ class CapturePieceListener : public EventListenerInterface {
 
                     for (const auto& indicator: indicators) {
                         if (indicator->validateBounds(mousePosition) &&
-                            indicator->getMoveOption() == MoveOptions::Capture) {
+                            (indicator->getMoveOption() == MoveOptions::Capture ||
+                             indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION)) {
                             this->gameState->markFirstMove(selectedPiece);
 
                             this->board->capture(
                                     indicator->getPositionX(),
                                     indicator->getPositionY()
                             );
-                            this->board->move(
-                                    selectedPiece,
-                                    indicator->getPositionX(),
-                                    indicator->getPositionY(),
-                                    true
-                            );
+
+                            if (indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
+                                auto selectedPieceType = PopUp(selectedPiece->getPieceColor()).draw();
+                                this->board->promote(
+                                        selectedPiece,
+                                        selectedPieceType,
+                                        indicator->getPositionX(),
+                                        indicator->getPositionY()
+                                );
+                            } else {
+                                this->board->move(
+                                        selectedPiece,
+                                        indicator->getPositionX(),
+                                        indicator->getPositionY(),
+                                        true
+                                );
+                            }
                         }
                     }
                 }

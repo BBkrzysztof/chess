@@ -28,23 +28,27 @@ class SelectPieceListener : public EventListenerInterface {
 
                             auto selectedPiece = this->board->getSelectedPieceReference();
                             selectedPiece->rebuildValidMoves();
-                            Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied() &
-                                                  ~this->gameState->promotionMove;
+                            Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
                             this->checkCastle(selectedPiece);
-                            this->checkPromotion(selectedPiece);
 
                             Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
                                     selectedPiece->getPieceColor()
                             );
 
-                            captureMoves = captureMoves | this->gameState->getEnPassantMove();
+                            this->checkPromotion(selectedPiece, captureMoves);
+
+                            captureMoves = (captureMoves | this->gameState->getEnPassantMove()) &
+                                           ~this->gameState->captureAndPromotionMove;
+
+                            validMoves &= (~this->gameState->promotionMove);
 
                             this->board->drawValidMoves(
                                     validMoves,
                                     captureMoves,
                                     this->gameState->kingCastleMove,
                                     this->gameState->queenCastleMove,
-                                    this->gameState->promotionMove
+                                    this->gameState->promotionMove,
+                                    this->gameState->captureAndPromotionMove
                             );
 
                             this->gameState->setEnPassantMove(0LL);
@@ -57,8 +61,9 @@ class SelectPieceListener : public EventListenerInterface {
         }
     }
 
-    void checkPromotion(Piece* selectedPiece) {
+    void checkPromotion(Piece* selectedPiece, Bitboard captureMoves) {
         this->gameState->promotionMove = 0ULL;
+        this->gameState->captureAndPromotionMove = 0ULL;
 
         if (selectedPiece->getPieceType() != PieceType::PAWN) {
             return;
@@ -71,10 +76,12 @@ class SelectPieceListener : public EventListenerInterface {
 
         if (selectedPiece->getPieceColor() == PieceColor::WHITE_PIECE) {
             this->gameState->promotionMove = (ROW_0 & validMoves);
+            this->gameState->captureAndPromotionMove = (ROW_0 & captureMoves);
             return;
         }
 
         this->gameState->promotionMove = (ROW_7 & validMoves);
+        this->gameState->captureAndPromotionMove = (ROW_7 & captureMoves);
     }
 
     void checkCastle(Piece* selectedPiece) {

@@ -8,6 +8,7 @@
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 #include "Assets/Container.hpp"
+
 /**
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
  * @todo promocja figury
@@ -59,7 +60,7 @@ int main() {
         }
 
         board->draw(window);
-
+        board->isCheck();
         window.display();
     }
 

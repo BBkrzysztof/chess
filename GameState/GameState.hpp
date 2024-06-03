@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include <algorithm>
 
 #include "../Board/board.hpp"
 #include "../Assets/BitBoard.hpp"
@@ -206,11 +207,11 @@ public:
 
     Bitboard getAttackedSquares(PieceColor team) {
 
-        auto enemyTeam = this->teams.at(team);
+        std::vector<Piece*> enemyTeam = this->teams.at(team);
 
         Bitboard attacks = 0LL;
 
-        for (const auto& element: enemyTeam) {
+        for (auto element: enemyTeam) {
             element->rebuildValidMoves();
             attacks |= (element->getValidMoves());
         }
@@ -276,6 +277,26 @@ public:
         }
     }
 
+    void removeFromTeam(Piece* selectedPiece) {
+        auto color = selectedPiece->getPieceColor();
+        auto targetVector = this->teams.at(color);
+        auto selectedPieceHash = selectedPiece->getHash();
+
+        auto result = std::find_if(
+                targetVector.begin(),
+                targetVector.end(),
+                [selectedPieceHash](const Piece* element) {
+                    return element->getHash() == selectedPieceHash;
+                }
+        );
+
+        if (result == targetVector.end()) {
+            throw std::exception();
+        }
+
+        targetVector.erase(result);
+        this->teams.at(color) = targetVector;
+    }
 
 public:
 
@@ -291,6 +312,7 @@ public:
     Bitboard kingCastleMove = 0ULL;
     Bitboard queenCastleMove = 0ULL;
     Bitboard promotionMove = 0ULL;
+    Bitboard captureAndPromotionMove = 0ULL;
 
     std::unordered_map<PieceColor, std::vector<Piece*>> teams;
 
