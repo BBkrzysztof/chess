@@ -13,7 +13,7 @@ Board::Board(GameState* gameState) {
     this->registerKings();
 }
 
-Board::Board(const Board& board, GameState* gameStateCopy) {
+Board::Board(const Board& board, GameState* gameStateCopy, const std::vector<MoveIndicator*>& indicators) {
     this->gameState = gameStateCopy;
 
     for (const auto& piece: board.pieces) {
@@ -21,6 +21,8 @@ Board::Board(const Board& board, GameState* gameStateCopy) {
     }
 
     this->selectedPiece = board.selectedPiece;
+
+    this->indicators = indicators;
 
     this->rebuildTeams();
 }
@@ -88,6 +90,10 @@ std::vector<MoveIndicator*> Board::getIndicators() {
     return this->indicators;
 }
 
+void Board::setIndicators(const std::vector<MoveIndicator*>& indicators) {
+    this->indicators = indicators;
+}
+
 void Board::drawValidMoves(
         const Bitboard& validMoves,
         const Bitboard& captureMoves,
@@ -126,7 +132,7 @@ void Board::drawValidMoves(
     }
 }
 
-void Board::isCheck(bool dump) {
+bool Board::isCheck(bool dump) {
     auto color = this->gameState->getTurn();
     bool isEnemyWhite = color == PieceColor::WHITE_PIECE;
 
@@ -134,34 +140,16 @@ void Board::isCheck(bool dump) {
             isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
 
     Bitboard kingPosition = this->gameState->getBitBoard(PieceType::KING, color);
-    if(dump){
+    if (dump) {
         BitBoard::dump(kingPosition, "king");
         BitBoard::dump(attacks, "attack");
     }
 
     if ((kingPosition & attacks) != 0LL) {
         this->gameState->setIsCheck(true);
-    } else {
-        this->gameState->setIsCheck(false);
-        this->gameState->checkEscapeMoves = FULL_BIT_BOARD;
-    }
-}
-
-bool Board::amICheck(bool dump){
-    auto color = this->gameState->getTurn();
-    bool isEnemyWhite = color != PieceColor::WHITE_PIECE;
-
-    Bitboard attacks = this->gameState->getAttackedSquares(
-            isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
-
-    Bitboard kingPosition = this->gameState->getBitBoard(PieceType::KING, PieceColor::BLACK_PIECE);
-
-    if ((kingPosition & attacks) != 0LL) {
-        this->gameState->setIsCheck(true);
         return true;
     } else {
         this->gameState->setIsCheck(false);
-        this->gameState->checkEscapeMoves = FULL_BIT_BOARD;
         return false;
     }
 }

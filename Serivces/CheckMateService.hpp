@@ -2,27 +2,26 @@
 
 #include "../Assets/BitBoard.hpp"
 #include "../Board/board.h"
-#include "../Serivces/SelectPieceService.hpp"
+#include "SelectPieceService.hpp"
 #include "../Engine/MoveSimulator.hpp"
 
-class CheckEscape {
+class CheckMateService {
 public:
-    static void getCheckEscapeMoves(const Board* board, GameState* gameState) {
-        CheckEscape* escape = new CheckEscape(board, gameState);
+    static void checkMate(const Board* board, GameState* gameState) {
+        CheckMateService* escape = new CheckMateService(board, gameState);
         auto moves = escape->findMoves();
-        BitBoard::dump(moves, "esc");
-        gameState->checkEscapeMoves = moves;
+        gameState->setIsCheckMate(moves == 0ULL);
     }
 
 private:
 
-    CheckEscape(const Board* board, const GameState* gameState) {
+    CheckMateService(const Board* board, const GameState* gameState) {
 
         this->gameStateEntryCopy = new GameState(*gameState);
         this->boardEntryCopy = new Board(*board, this->gameStateEntryCopy);
     }
 
-    ~CheckEscape() {
+    ~CheckMateService() {
         delete this->boardEntryCopy;
         delete this->gameStateEntryCopy;
     }

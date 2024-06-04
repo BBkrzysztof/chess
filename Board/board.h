@@ -34,7 +34,7 @@ class Board {
 public:
     Board(GameState* gameState);
 
-    Board(const Board& board, GameState* gameStateCopy);
+    Board(const Board& board, GameState* gameStateCopy, const std::vector<MoveIndicator*>& indicators = {});
 
     void draw(sf::RenderTarget& target);
 
@@ -59,12 +59,13 @@ public:
             const Bitboard& captureAndPromotion
     );
 
-    void isCheck(bool dump = false);
-    bool amICheck(bool dump = false);
+    bool isCheck(bool dump = false);
 
     void rebuildTeams();
 
     void setPieces(std::map<std::string, Piece*> pieces);
+
+    void setIndicators(const std::vector<MoveIndicator*>& indicators);
 
 private:
 

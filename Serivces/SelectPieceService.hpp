@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Board/board.h"
+#include "../Engine/MoveSimulator.hpp"
 
 class SelectPieceService {
 public:
@@ -40,8 +41,9 @@ private:
             );
         }
 
-        Bitboard validMoves =
-                selectedPiece->getValidMoves() & this->gameState->checkEscapeMoves & ~this->gameState->calcOccupied();
+        Bitboard validMoves = selectedPiece->getValidMoves() & ~this->gameState->calcOccupied();
+
+        this->isMovesKingIntoCheck(selectedPiece, validMoves);
         this->checkCastle(selectedPiece);
 
         Bitboard captureMoves = selectedPiece->getValidMoves() & this->gameState->calcBeatable(
@@ -50,23 +52,28 @@ private:
 
         this->checkPromotion(selectedPiece, captureMoves);
 
-        captureMoves = (captureMoves | this->gameState->getEnPassantMove()) &
-                       ~this->gameState->captureAndPromotionMove;
+        this->gameState->captureMoves = captureMoves = (captureMoves | this->gameState->getEnPassantMove()) &
+                                                       ~this->gameState->captureAndPromotionMove;
 
-        validMoves &= (~this->gameState->promotionMove);
+        this->gameState->validMoves = validMoves &= (~this->gameState->promotionMove);
 
         this->board->drawValidMoves(
-                validMoves,
-                captureMoves,
+                this->gameState->validMoves,
+                this->gameState->captureMoves,
                 this->gameState->kingCastleMove,
                 this->gameState->queenCastleMove,
                 this->gameState->promotionMove,
                 this->gameState->captureAndPromotionMove
         );
 
+        this->validateNotOpeningCheck();
+        this->ValidateCheckEscape();
+
         this->gameState->setEnPassantMove(0LL);
         this->gameState->kingCastleMove = 0ULL;
         this->gameState->queenCastleMove = 0ULL;
+        this->gameState->validMoves = 0ULL;
+        this->gameState->captureMoves = 0ULL;
     }
 
     void checkPromotion(Piece* selectedPiece, Bitboard captureMoves) {
@@ -117,6 +124,20 @@ private:
 
     }
 
+    void isMovesKingIntoCheck(Piece* selectedPiece, Bitboard& oldValidMoves) {
+
+        if (selectedPiece->getPieceType() != PieceType::KING) {
+            return;
+        }
+
+        auto enemyColor = selectedPiece->getPieceColor() == PieceColor::WHITE_PIECE ? PieceColor::BLACK_PIECE
+                                                                                    : PieceColor::WHITE_PIECE;
+
+        Bitboard attacked = this->gameState->getAttackedSquares(enemyColor);
+
+        oldValidMoves = oldValidMoves & (~attacked);
+    }
+
     void isValidEnPassantMove(MoveHistoryElement* lastMove, Bitboard current) {
 
         if (lastMove == nullptr) {
@@ -138,6 +159,56 @@ private:
         } else {
             this->gameState->setEnPassantMove(0LL);
         }
+    }
+
+    void validateNotOpeningCheck() {
+        std::vector<MoveIndicator*> validIndicators;
+        GameState* gameStateEntryCopy = new GameState(*this->gameState);
+        Board* boardEntryCopy = new Board(*this->board, this->gameState, this->board->getIndicators());
+
+        for (const auto& indicator: boardEntryCopy->getIndicators()) {
+            bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
+                    indicator,
+                    gameStateEntryCopy,
+                    boardEntryCopy
+            );
+
+            if (!isCheck) {
+                validIndicators.push_back(indicator);
+            }
+        }
+
+        delete gameStateEntryCopy;
+        delete boardEntryCopy;
+
+        this->board->setIndicators(validIndicators);
+    }
+
+    void ValidateCheckEscape() {
+        if (!this->gameState->getIsCheck()) {
+            return;
+        }
+
+        std::vector<MoveIndicator*> validIndicators;
+        GameState* gameStateEntryCopy = new GameState(*this->gameState);
+        Board* boardEntryCopy = new Board(*this->board, this->gameState, this->board->getIndicators());
+
+        for (const auto& indicator: boardEntryCopy->getIndicators()) {
+            bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
+                    indicator,
+                    gameStateEntryCopy,
+                    boardEntryCopy
+            );
+
+            if (!isCheck) {
+                validIndicators.push_back(indicator);
+            }
+        }
+
+        delete gameStateEntryCopy;
+        delete boardEntryCopy;
+
+        this->board->setIndicators(validIndicators);
     }
 
 private:

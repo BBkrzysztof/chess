@@ -6,7 +6,7 @@
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
-#include "Moves/CheckEscape.hpp"
+#include "Serivces/CheckMateService.hpp"
 
 /**
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
@@ -49,6 +49,10 @@ int main() {
     while (window.isOpen()) {
         window.clear();
 
+        if (gameState->getIsCheckMate()) {
+            std::cout << "Mat" << std::endl;
+            break;
+        }
 
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -57,11 +61,12 @@ int main() {
 
         board->draw(window);
 
-        if (gameState->getIsCheck() && gameState->checkEscapeMoves == FULL_BIT_BOARD) {
-            CheckEscape::getCheckEscapeMoves(board, gameState);
+        board->isCheck();
+
+        if (gameState->getIsCheck() && !gameState->getIsCheckMate()) {
+            CheckMateService::checkMate(board, gameState);
         }
 
-        board->isCheck();
         window.display();
     }
 

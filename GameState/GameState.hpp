@@ -49,6 +49,8 @@ public:
         this->isCheckmate = gameState.isCheckmate;
         this->isStalemate = gameState.isStalemate;
         this->moveHistory = gameState.moveHistory;
+        this->validMoves = gameState.validMoves;
+        this->captureMoves = gameState.captureMoves;
     }
 
     Bitboard calcOccupied() const {
@@ -343,8 +345,10 @@ public:
     Bitboard promotionMove = 0ULL;
     Bitboard captureAndPromotionMove = 0ULL;
 
+    Bitboard validMoves = 0ULL;
+    Bitboard captureMoves = 0ULL;
+
     std::unordered_map<PieceColor, std::vector<Piece*>> teams;
-    Bitboard checkEscapeMoves = FULL_BIT_BOARD;
 
 private:
     Bitboard whitePawns = 0x00FF000000000000ULL;
