@@ -3,8 +3,7 @@
 #include "../Assets/BitBoard.hpp"
 #include "../Board/board.h"
 #include "../Serivces/SelectPieceService.hpp"
-#include "../Serivces/MovePieceService.hpp"
-#include "../Serivces/CapurePieceService.hpp"
+#include "../Engine/MoveSimulator.hpp"
 
 class CheckEscape {
 public:
@@ -40,7 +39,11 @@ private:
 
             for (const auto& indicator: this->boardEntryCopy->indicators) {
                 //simulate each move
-                bool isCheck = this->simulateMove(indicator);
+                bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
+                        indicator,
+                        this->gameStateEntryCopy,
+                        this->boardEntryCopy
+                );
                 if (!isCheck) {
                     int shift = BitBoard::calcShift(indicator->getPositionX(), indicator->getPositionY());
                     escapeMove |= BitBoard::insert(0ULL, shift);
@@ -50,52 +53,6 @@ private:
         delete this->boardEntryCopy;
         delete this->gameStateEntryCopy;
         return escapeMove;
-    }
-
-    bool simulateMove(MoveIndicator* indicator) {
-
-        GameState* gameStateCopy = new GameState(*this->gameStateEntryCopy);
-        Board* boardCopy = new Board(*this->boardEntryCopy, gameStateCopy);
-
-        if (indicator->getMoveOption() == MoveOptions::Capture ||
-            indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
-            CapturePieceService::Capture(
-                    boardCopy,
-                    boardCopy->getSelectedPieceReference(),
-                    indicator,
-                    CheckEscape::getMock()
-            );
-        } else {
-            MovePieceService::Move(
-                    boardCopy,
-                    boardCopy->getSelectedPieceReference(),
-                    indicator,
-                    CheckEscape::getMock()
-            );
-        }
-
-        bool result = boardCopy->amICheck(true);
-
-        delete gameStateCopy;
-        delete boardCopy;
-
-        return result;
-    }
-
-    static PopUpInterface* getMock() {
-        class Mock : public PopUpInterface {
-        public:
-            Mock(PieceType type) : type(type) {}
-
-            PieceType draw() {
-                return this->type;
-            }
-
-        private:
-            PieceType type;
-        };
-
-        return new Mock(PieceType::QUEEN);
     }
 
 private:
