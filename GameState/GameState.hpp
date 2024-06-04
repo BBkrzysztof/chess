@@ -8,29 +8,10 @@
 #include "../Piece/Base/MoveIndicator.hpp"
 #include "../Assets/BitBoard.hpp"
 
-class Movee {
-public:
-    int from;
-    int to;
-    MoveOptions moveOptions;
-    PieceColor color;
-    PieceType type;
-    Piece* piece;
-
-    Movee() = default;
-
-    Movee(
-            int from,
-            int to,
-            MoveOptions options,
-            PieceColor color,
-            PieceType type,
-            Piece* piece
-    ) : from(from), to(to), moveOptions(options), color(color), type(type), piece(piece) {};
-};
+#include "../Moves/MoveHistoryElement.hpp"
 
 typedef uint64_t Bitboard;
-typedef class Movee MoveElement;
+typedef class MoveHistoryElement MoveElement;
 
 class GameState {
 
@@ -50,7 +31,6 @@ public:
         this->queenCastleMove = gameState.queenCastleMove;
         this->promotionMove = gameState.promotionMove;
         this->captureAndPromotionMove = gameState.captureAndPromotionMove;
-        this->teams = gameState.teams;
         this->whitePawns = gameState.whitePawns;
         this->blackPawns = gameState.blackPawns;
         this->whiteKnights = gameState.whiteKnights;
@@ -65,10 +45,10 @@ public:
         this->blackKing = gameState.blackKing;
         this->turn = gameState.turn;
         this->enPassantMove = gameState.enPassantMove;
-        this->moveHistory = gameState.moveHistory;
         this->isCheck = gameState.isCheck;
         this->isCheckmate = gameState.isCheckmate;
         this->isStalemate = gameState.isStalemate;
+        this->moveHistory = gameState.moveHistory;
     }
 
     Bitboard calcOccupied() const {
@@ -245,10 +225,14 @@ public:
 
         std::vector<Piece*> enemyTeam = this->teams.at(team);
 
-        Bitboard attacks = 0LL;
+        Bitboard attacks = 0ULL;
 
         for (auto element: enemyTeam) {
-            element->rebuildValidMoves();
+            element->rebuildValidMoves(
+                    this->calcBeatable(element->getPieceColor()),
+                    this->calcOccupied(),
+                    this->peekHistory()
+            );
             attacks |= (element->getValidMoves());
         }
 
@@ -339,6 +323,10 @@ public:
         this->teams.at(color).push_back(selectedPiece);
     }
 
+    std::vector<Piece*> getCurrentTeam() {
+        return this->teams[this->turn];
+    }
+
 public:
 
     bool whiteKingMoved = false;
@@ -356,6 +344,7 @@ public:
     Bitboard captureAndPromotionMove = 0ULL;
 
     std::unordered_map<PieceColor, std::vector<Piece*>> teams;
+    Bitboard checkEscapeMoves = FULL_BIT_BOARD;
 
 private:
     Bitboard whitePawns = 0x00FF000000000000ULL;

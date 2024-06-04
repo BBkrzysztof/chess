@@ -37,5 +37,36 @@ public:
         return new Pawn(color, x, y);
     }
 
+    static Piece* copy(const Piece* piece) {
+
+        Piece* copy = nullptr;
+        PieceColor color = piece->getPieceColor();
+        int x = piece->getPositionX() / 100;
+        int y = piece->getPositionY() / 100;
+
+        switch (piece->getPieceType()) {
+            case PieceType::PAWN:
+                copy = new Pawn(color, x, y);
+                break;
+            case PieceType::KNIGHT:
+                copy = new Knight(color, x, y);
+                break;
+            case PieceType::BISHOP:
+                copy = new Bishop(color, x, y);
+                break;
+            case PieceType::ROOK:
+                copy = new Rook(color, x, y);
+                break;
+            case PieceType::QUEEN:
+                copy = new Queen(color, x, y);
+                break;
+            case PieceType::KING:
+                copy = new King(color, x, y);
+                break;
+        }
+        copy->setHash(piece->getHash());
+        return copy;
+    }
+
 
 };

@@ -7,7 +7,6 @@
 #include <functional>
 #include <SFML/Graphics.hpp>
 
-#include "../GameState/GameState.hpp"
 
 #include "../Piece/King.hpp"
 #include "../Piece/Pawn.hpp"
@@ -18,6 +17,7 @@
 #include "../Piece/Base/Piece.hpp"
 #include "../Piece/Factory/PieceFactory.hpp"
 #include "../Assets/Helper.hpp"
+#include "../GameState/GameState.hpp"
 
 typedef uint64_t Bitboard;
 
@@ -59,7 +59,10 @@ public:
             const Bitboard& captureAndPromotion
     );
 
-    void isCheck();
+    void isCheck(bool dump = false);
+    bool amICheck(bool dump = false);
+
+    void rebuildTeams();
 
     void setPieces(std::map<std::string, Piece*> pieces);
 

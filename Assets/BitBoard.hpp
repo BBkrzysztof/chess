@@ -4,9 +4,26 @@
 
 
 typedef uint64_t Bitboard;
+const Bitboard FULL_BIT_BOARD = 0xFFFFFFFFFFFFFFFFULL;
+
+enum PieceColor {
+    WHITE_PIECE = 1,
+    BLACK_PIECE = 2
+};
+
+enum PieceType {
+    PAWN = 0,
+    KNIGHT = 1,
+    BISHOP = 2,
+    ROOK = 3,
+    QUEEN = 4,
+    KING = 5,
+};
+
 
 class BitBoard {
 public:
+
     static void dump(const Bitboard& bitboard, std::string title = "") {
 
         if (!title.empty()) {

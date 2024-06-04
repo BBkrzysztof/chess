@@ -5,9 +5,7 @@
 class Knight : public Piece {
 public:
 
-    Knight(PieceColor color, int x, int y) : Piece(color, PieceType::KNIGHT, x, y) {
-        this->buildValidMoves();
-    };
+    Knight(PieceColor color, int x, int y) : Piece(color, PieceType::KNIGHT, x, y) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard bitboard = 1ULL << position;
@@ -27,9 +25,8 @@ public:
 
 protected:
 
-    void buildValidMoves() final {
+    void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
         int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
-        Bitboard occupied = Container::getGameState()->calcOccupied();
 
         this->validMoves = Knight::getValidMoves(i, occupied);
     }

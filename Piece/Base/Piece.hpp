@@ -5,25 +5,12 @@
 #include <iostream>
 
 #include "../../Assets/BitBoard.hpp"
+#include "../../Moves/MoveHistoryElement.hpp"
 
 const std::string PATH = "../Piece/icons/";
 
 sf::Color bgColor(255, 240, 170);
 typedef uint64_t Bitboard;
-
-enum PieceColor {
-    WHITE_PIECE = 1,
-    BLACK_PIECE = 2
-};
-
-enum PieceType {
-    PAWN = 0,
-    KNIGHT = 1,
-    BISHOP = 2,
-    ROOK = 3,
-    QUEEN = 4,
-    KING = 5,
-};
 
 const std::map<PieceType, std::string> icons = {
         {PieceType::PAWN,   "P.png"},
@@ -44,7 +31,6 @@ public:
 
         this->pieceType = type;
         this->pieceColor = color;
-        std::cout << "Loaded texture: " << this->buildIconPath() << std::endl;
 
         if (!this->texture.loadFromFile(this->buildIconPath())) {
             throw std::exception();
@@ -118,13 +104,13 @@ public:
         return this->hash;
     }
 
-    void rebuildValidMoves() {
-        this->buildValidMoves();
+    void rebuildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) {
+        this->buildValidMoves(captures, occupied, lastMove);
     }
 
 protected:
 
-    virtual void buildValidMoves() = 0;
+    virtual void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) = 0;
 
 private:
 

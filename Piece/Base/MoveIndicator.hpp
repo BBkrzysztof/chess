@@ -51,15 +51,15 @@ public:
         return bounds.contains(static_cast<sf::Vector2f>(mousePosition));
     }
 
-    int getPositionX() {
+    int getPositionX() const{
         return this->positionX;
     }
 
-    int getPositionY() {
+    int getPositionY() const{
         return this->positionY;
     }
 
-    MoveOptions getMoveOption() {
+    MoveOptions getMoveOption() const{
         return this->moveOption;
     }
 

@@ -4,10 +4,9 @@
 #include "EventDispatcher/EventDispatcher.hpp"
 #include "EventDispatcher/Listeners/CloseWindowListener.hpp"
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
-#include "EventDispatcher/Listeners/HoverPieceListener.hpp"
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
-#include "Assets/Container.hpp"
+#include "Moves/CheckEscape.hpp"
 
 /**
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
@@ -20,11 +19,9 @@ int main() {
 
 
     GameState* gameState = new GameState();
-    Container::setGameSate(gameState);
-
     Board* board = new Board(gameState);
 
-    Container::buildContainer(board, gameState, &window);
+    EventDispatcher::buildContext(board, gameState, &window);
 
     EventDispatcher::registerListener(
             sf::Event::Closed,
@@ -52,12 +49,18 @@ int main() {
     while (window.isOpen()) {
         window.clear();
 
+
         sf::Event event;
         while (window.pollEvent(event)) {
             EventDispatcher::dispatch(event);
         }
 
         board->draw(window);
+
+        if (gameState->getIsCheck() && gameState->checkEscapeMoves == FULL_BIT_BOARD) {
+            CheckEscape::getCheckEscapeMoves(board, gameState);
+        }
+
         board->isCheck();
         window.display();
     }

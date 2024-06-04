@@ -3,6 +3,8 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+#include "PopUpInterface.hpp"
+
 struct Panel {
     sf::Sprite sprite;
     sf::Texture texture;
@@ -67,9 +69,7 @@ private:
 };
 
 
-class PopUp {
-
-
+class PopUp : public PopUpInterface {
 public:
     PopUp(const PieceColor& color) {
         this->pieceColor = color;

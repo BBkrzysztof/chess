@@ -15,9 +15,14 @@ Board::Board(GameState* gameState) {
 
 Board::Board(const Board& board, GameState* gameStateCopy) {
     this->gameState = gameStateCopy;
-    this->indicators = board.indicators;
-    this->pieces = board.pieces;
+
+    for (const auto& piece: board.pieces) {
+        this->pieces[piece.first] = PieceFactory::copy(piece.second);
+    }
+
     this->selectedPiece = board.selectedPiece;
+
+    this->rebuildTeams();
 }
 
 
@@ -121,20 +126,43 @@ void Board::drawValidMoves(
     }
 }
 
-void Board::isCheck() {
-    auto color = Container::getGameState()->getTurn();
+void Board::isCheck(bool dump) {
+    auto color = this->gameState->getTurn();
     bool isEnemyWhite = color == PieceColor::WHITE_PIECE;
 
     Bitboard attacks = this->gameState->getAttackedSquares(
             isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
 
-    Bitboard kingPosition = Container::getGameState()->getBitBoard(PieceType::KING, color);
+    Bitboard kingPosition = this->gameState->getBitBoard(PieceType::KING, color);
+    if(dump){
+        BitBoard::dump(kingPosition, "king");
+        BitBoard::dump(attacks, "attack");
+    }
 
     if ((kingPosition & attacks) != 0LL) {
-        Container::getGameState()->setIsCheck(true);
-        std::cout << "szach" << std::endl;
+        this->gameState->setIsCheck(true);
     } else {
-        Container::getGameState()->setIsCheck(false);
+        this->gameState->setIsCheck(false);
+        this->gameState->checkEscapeMoves = FULL_BIT_BOARD;
+    }
+}
+
+bool Board::amICheck(bool dump){
+    auto color = this->gameState->getTurn();
+    bool isEnemyWhite = color != PieceColor::WHITE_PIECE;
+
+    Bitboard attacks = this->gameState->getAttackedSquares(
+            isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
+
+    Bitboard kingPosition = this->gameState->getBitBoard(PieceType::KING, PieceColor::BLACK_PIECE);
+
+    if ((kingPosition & attacks) != 0LL) {
+        this->gameState->setIsCheck(true);
+        return true;
+    } else {
+        this->gameState->setIsCheck(false);
+        this->gameState->checkEscapeMoves = FULL_BIT_BOARD;
+        return false;
     }
 }
 
@@ -238,8 +266,16 @@ void Board::registerPiecesGroup(const std::function<void(int, int)>& reg, const 
     }
 }
 
+void Board::rebuildTeams() {
+    this->gameState->teams.clear();
+    for (const auto& piece: this->pieces) {
+        this->gameState->teams[piece.second->getPieceColor()].push_back(piece.second);
+    }
+}
+
 void Board::registerPiece(Piece* piece, std::string key) {
     auto pieceKey = key.empty() ? Helper::getHash(piece) : key;
+    piece->setHash(pieceKey);
     this->pieces[pieceKey] = piece;
 }
 

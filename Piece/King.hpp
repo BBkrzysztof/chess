@@ -1,14 +1,11 @@
 #pragma once
 
 #include "Base/Piece.hpp"
-#include "../Assets/Container.hpp"
 
 class King : public Piece {
 public:
 
-    King(PieceColor color, int x, int y) : Piece(color, PieceType::KING, x, y) {
-        this->buildValidMoves();
-    };
+    King(PieceColor color, int x, int y) : Piece(color, PieceType::KING, x, y) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard bitboard = 1ULL << position;
@@ -34,9 +31,7 @@ public:
 
 
 protected:
-    void buildValidMoves() final {
-        Bitboard occupied = Container::getGameState()->calcOccupied();
-
+    void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
         int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
 
         this->validMoves = King::getValidMoves(i, occupied);

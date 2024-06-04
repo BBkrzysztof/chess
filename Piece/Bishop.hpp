@@ -1,15 +1,11 @@
 #pragma once
 
-
 #include "Base/Piece.hpp"
-#include "../Assets/Container.hpp"
 
 class Bishop : public Piece {
 public:
 
-    Bishop(PieceColor color, int x, int y) : Piece(color, PieceType::BISHOP, x, y) {
-        this->buildValidMoves();
-    };
+    Bishop(PieceColor color, int x, int y) : Piece(color, PieceType::BISHOP, x, y) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard moves = 0ULL;
@@ -40,9 +36,8 @@ public:
 
 
 protected:
-    void buildValidMoves() final {
+    void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
 
-        Bitboard occupied = Container::getGameState()->calcOccupied();
         int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);
 
         this->validMoves = Bishop::getValidMoves(i, occupied);
