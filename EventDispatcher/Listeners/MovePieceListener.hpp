@@ -8,6 +8,7 @@
 #include "../../Assets/BitBoard.hpp"
 #include "../../Assets/PopUp.hpp"
 #include "../../Serivces/MovePieceService.hpp"
+#include "../../Serivces/CheckMateService.hpp"
 
 class MovePieceListener : public EventListenerInterface {
     void onEvent(sf::Event event) final {
@@ -26,6 +27,8 @@ class MovePieceListener : public EventListenerInterface {
                                     indicator,
                                     new PopUp(selectedPiece->getPieceColor())
                             );
+                            this->board->isCheck();
+                            CheckMateService::checkMate(this->board, this->gameState);
                         }
                     }
                 }

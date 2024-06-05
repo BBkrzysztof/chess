@@ -8,9 +8,11 @@
 class CheckMateService {
 public:
     static void checkMate(const Board* board, GameState* gameState) {
-        CheckMateService* escape = new CheckMateService(board, gameState);
-        auto moves = escape->findMoves();
-        gameState->setIsCheckMate(moves == 0ULL);
+        if (gameState->getIsCheck()) {
+            auto* escape = new CheckMateService(board, gameState);
+            auto isMat = escape->validate();
+            gameState->setIsCheckMate(isMat);
+        }
     }
 
 private:
@@ -26,8 +28,8 @@ private:
         delete this->gameStateEntryCopy;
     }
 
-    Bitboard findMoves() {
-        Bitboard escapeMove = 0ULL;
+    bool validate() {
+        bool isMat = true;
 
         auto team = this->gameStateEntryCopy->getCurrentTeam();
 
@@ -36,22 +38,13 @@ private:
             this->boardEntryCopy->setSelectedPiece(piece->getHash());
             SelectPieceService::Select(piece, this->boardEntryCopy);
 
-            for (const auto& indicator: this->boardEntryCopy->indicators) {
-                //simulate each move
-                bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
-                        indicator,
-                        this->gameStateEntryCopy,
-                        this->boardEntryCopy
-                );
-                if (!isCheck) {
-                    int shift = BitBoard::calcShift(indicator->getPositionX(), indicator->getPositionY());
-                    escapeMove |= BitBoard::insert(0ULL, shift);
-                }
+            if (!this->boardEntryCopy->getIndicators().empty()) {
+                isMat = false;
+                break;
             }
         }
-        delete this->boardEntryCopy;
-        delete this->gameStateEntryCopy;
-        return escapeMove;
+
+        return isMat;
     }
 
 private:

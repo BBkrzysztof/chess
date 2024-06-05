@@ -46,32 +46,20 @@ int main() {
             101
     );
 
-    int counter = 0;
-
     while (window.isOpen()) {
-        window.clear();
-
-        if (gameState->getIsCheckMate()) {
-            std::cout << "Mat" << std::endl;
-            break;
-        }
 
         sf::Event event;
         while (window.pollEvent(event)) {
             EventDispatcher::dispatch(event);
         }
-
+        window.clear();
         board->draw(window);
-
-        board->isCheck();
-
-        if (gameState->getIsCheck() && !gameState->getIsCheckMate() && counter == 100) {
-            CheckMateService::checkMate(board, gameState);
-            counter = 0;
-        }
-
         window.display();
-        counter++;
+
+        if (gameState->getIsCheckMate()) {
+            std::cout << "Mat" << std::endl;
+            return 0;
+        }
     }
 
     return 0;

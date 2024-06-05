@@ -3,6 +3,7 @@
 #include "../EventListenerInterface.hpp"
 #include "../../Assets/BitBoard.hpp"
 #include "../../Serivces/CapurePieceService.hpp"
+#include "../../Serivces/CheckMateService.hpp"
 
 class CapturePieceListener : public EventListenerInterface {
     void onEvent(sf::Event event) final {
@@ -24,6 +25,9 @@ class CapturePieceListener : public EventListenerInterface {
                                     indicator,
                                     new PopUp(selectedPiece->getPieceColor())
                             );
+
+                            this->board->isCheck();
+                            CheckMateService::checkMate(this->board, this->gameState);
                         }
                     }
                 }
