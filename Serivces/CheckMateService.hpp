@@ -3,7 +3,7 @@
 #include "../Assets/BitBoard.hpp"
 #include "../Board/board.h"
 #include "SelectPieceService.hpp"
-#include "../Engine/MoveSimulator.hpp"
+#include "CheckMoveSimulator.hpp"
 
 class CheckMateService {
 public:

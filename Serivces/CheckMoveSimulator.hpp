@@ -2,10 +2,10 @@
 
 #include "../Assets/BitBoard.hpp"
 #include "../Board/board.h"
-#include "../Serivces/MovePieceService.hpp"
-#include "../Serivces/CapurePieceService.hpp"
+#include "MovePieceService.hpp"
+#include "CapurePieceService.hpp"
 
-class MoveSimulator {
+class CheckMoveSimulator {
 public:
     static bool simulateMoveAndCheckIsCheck(MoveIndicator* indicator, const GameState* gameState, const Board* board) {
 
@@ -18,14 +18,14 @@ public:
                     boardCopy,
                     boardCopy->getSelectedPieceReference(),
                     indicator,
-                    MoveSimulator::getMock()
+                    CheckMoveSimulator::getMock()
             );
         } else {
             MovePieceService::Move(
                     boardCopy,
                     boardCopy->getSelectedPieceReference(),
                     indicator,
-                    MoveSimulator::getMock()
+                    CheckMoveSimulator::getMock()
             );
         }
         gameStateCopy->toggleTurn();

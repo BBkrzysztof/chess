@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Board/board.h"
-#include "../Engine/MoveSimulator.hpp"
+#include "CheckMoveSimulator.hpp"
 
 class SelectPieceService {
 public:
@@ -167,7 +167,7 @@ private:
         Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
 
         for (const auto& indicator: boardEntryCopy->getIndicators()) {
-            bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
+            bool isCheck = CheckMoveSimulator::simulateMoveAndCheckIsCheck(
                     indicator,
                     gameStateEntryCopy,
                     boardEntryCopy
@@ -193,7 +193,7 @@ private:
         Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
 
         for (const auto& indicator: boardEntryCopy->getIndicators()) {
-            bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
+            bool isCheck = CheckMoveSimulator::simulateMoveAndCheckIsCheck(
                     indicator,
                     gameStateEntryCopy,
                     boardEntryCopy
