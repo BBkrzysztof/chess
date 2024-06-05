@@ -23,6 +23,8 @@ public:
         return moves;
     }
 
+    ~Knight() override {}
+
 protected:
 
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {

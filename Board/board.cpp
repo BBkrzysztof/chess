@@ -27,6 +27,17 @@ Board::Board(const Board& board, GameState* gameStateCopy, const std::vector<Mov
     this->rebuildTeams();
 }
 
+Board::~Board() {
+    this->gameState->teams[PieceColor::WHITE_PIECE].clear();
+    this->gameState->teams[PieceColor::BLACK_PIECE].clear();
+
+    for (const auto& piece: this->pieces) {
+        delete piece.second;
+
+    }
+    this->pieces.clear();
+//
+}
 
 void Board::draw(sf::RenderTarget& target) {
     // draw board
@@ -102,6 +113,10 @@ void Board::drawValidMoves(
         const Bitboard& promotions,
         const Bitboard& captureAndPromotion
 ) {
+    for (const auto& item: this->indicators) {
+        delete item;
+    }
+
     for (int rank = 7; rank >= 0; --rank) {
         for (int file = 0; file < 8; ++file) {
             if (validMoves & (1ULL << BitBoard::calcShift(file, rank))) {

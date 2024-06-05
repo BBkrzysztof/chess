@@ -46,6 +46,8 @@ int main() {
             101
     );
 
+    int counter = 0;
+
     while (window.isOpen()) {
         window.clear();
 
@@ -63,11 +65,13 @@ int main() {
 
         board->isCheck();
 
-        if (gameState->getIsCheck() && !gameState->getIsCheckMate()) {
+        if (gameState->getIsCheck() && !gameState->getIsCheckMate() && counter == 100) {
             CheckMateService::checkMate(board, gameState);
+            counter = 0;
         }
 
         window.display();
+        counter++;
     }
 
     return 0;

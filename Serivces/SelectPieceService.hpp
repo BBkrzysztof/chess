@@ -164,7 +164,7 @@ private:
     void validateNotOpeningCheck() {
         std::vector<MoveIndicator*> validIndicators;
         GameState* gameStateEntryCopy = new GameState(*this->gameState);
-        Board* boardEntryCopy = new Board(*this->board, this->gameState, this->board->getIndicators());
+        Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
 
         for (const auto& indicator: boardEntryCopy->getIndicators()) {
             bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
@@ -178,7 +178,6 @@ private:
             }
         }
 
-        delete gameStateEntryCopy;
         delete boardEntryCopy;
 
         this->board->setIndicators(validIndicators);
@@ -191,7 +190,7 @@ private:
 
         std::vector<MoveIndicator*> validIndicators;
         GameState* gameStateEntryCopy = new GameState(*this->gameState);
-        Board* boardEntryCopy = new Board(*this->board, this->gameState, this->board->getIndicators());
+        Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
 
         for (const auto& indicator: boardEntryCopy->getIndicators()) {
             bool isCheck = MoveSimulator::simulateMoveAndCheckIsCheck(
@@ -205,7 +204,6 @@ private:
             }
         }
 
-        delete gameStateEntryCopy;
         delete boardEntryCopy;
 
         this->board->setIndicators(validIndicators);

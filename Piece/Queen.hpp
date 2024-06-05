@@ -49,6 +49,8 @@ public:
         return moves;
     }
 
+    ~Queen() override {}
+
 protected:
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
         int i = BitBoard::calcShift(this->getPositionX() / 100, this->getPositionY() / 100);

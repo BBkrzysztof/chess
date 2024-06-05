@@ -43,8 +43,6 @@ public:
         this->resetPosition();
     }
 
-    ~Piece() = default;
-
     void draw(sf::RenderTarget& target) {
         if (this->selected) {
             target.draw(this->background);
@@ -106,6 +104,10 @@ public:
 
     void rebuildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) {
         this->buildValidMoves(captures, occupied, lastMove);
+    }
+
+    virtual ~Piece(){
+
     }
 
 protected:

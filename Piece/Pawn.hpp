@@ -93,6 +93,8 @@ public:
         }
     }
 
+    ~Pawn() override {}
+
 protected:
 
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {

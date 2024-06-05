@@ -31,8 +31,8 @@ public:
         gameStateCopy->toggleTurn();
         bool result = boardCopy->isCheck();
 
-        delete gameStateCopy;
         delete boardCopy;
+        delete gameStateCopy;
 
         return result;
     }

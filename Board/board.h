@@ -36,6 +36,8 @@ public:
 
     Board(const Board& board, GameState* gameStateCopy, const std::vector<MoveIndicator*>& indicators = {});
 
+    ~Board();
+
     void draw(sf::RenderTarget& target);
 
     std::map<std::string, Piece*> getPieces();
