@@ -5,7 +5,8 @@
 class Knight : public Piece {
 public:
 
-    Knight(PieceColor color, int x, int y) : Piece(color, PieceType::KNIGHT, x, y) {};
+    Knight(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::KNIGHT, x, y,
+                                                                           lightMode) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard bitboard = 1ULL << position;

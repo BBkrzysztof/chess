@@ -5,7 +5,7 @@
 class Queen : public Piece {
 public:
 
-    Queen(PieceColor color, int x, int y) : Piece(color, PieceType::QUEEN, x, y) {};
+    Queen(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::QUEEN, x, y, lightMode) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard moves = 0ULL;

@@ -18,7 +18,7 @@ enum MoveOptions {
 
 class MoveIndicator {
 public:
-    MoveIndicator(int x, int y, MoveOptions option = MoveOptions::Move) {
+    MoveIndicator(int x = 0, int y = 0, MoveOptions option = MoveOptions::Move) {
         this->positionX = x;
         this->positionY = y;
 
@@ -42,6 +42,13 @@ public:
         this->moveOption = option;
     };
 
+    MoveIndicator& operator=(const MoveIndicator* other) {
+        this->positionX = other->getPositionX();
+        this->positionY = other->getPositionY();
+        this->moveOption = other->getMoveOption();
+        return *this;
+    }
+
     void draw(sf::RenderTarget& target) {
         target.draw(this->circleShape);
     }
@@ -51,15 +58,15 @@ public:
         return bounds.contains(static_cast<sf::Vector2f>(mousePosition));
     }
 
-    int getPositionX() const{
+    int getPositionX() const {
         return this->positionX;
     }
 
-    int getPositionY() const{
+    int getPositionY() const {
         return this->positionY;
     }
 
-    MoveOptions getMoveOption() const{
+    MoveOptions getMoveOption() const {
         return this->moveOption;
     }
 

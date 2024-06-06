@@ -8,7 +8,7 @@
 class Pawn : public Piece {
 public:
 
-    Pawn(PieceColor color, int x, int y) : Piece(color, PieceType::PAWN, x, y) {
+    Pawn(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::PAWN, x, y, lightMode) {
     };
 
     static Bitboard getValidMoves(

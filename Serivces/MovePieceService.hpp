@@ -25,6 +25,7 @@ private:
         instruction.board = this->board;
         instruction.gameState = this->gameState;
         instruction.selectedPiece = selectedPiece;
+        instruction.pieceColor = selectedPiece->getPieceColor();
 
         if (indicator->getMoveOption() == MoveOptions::Move) {
             this->gameState->markFirstMove(selectedPiece);

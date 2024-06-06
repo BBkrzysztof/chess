@@ -46,25 +46,27 @@ public:
 
         switch (piece->getPieceType()) {
             case PieceType::PAWN:
-                copy = new Pawn(color, x, y);
+                copy = new Pawn(color, x, y, true);
                 break;
             case PieceType::KNIGHT:
-                copy = new Knight(color, x, y);
+                copy = new Knight(color, x, y, true);
                 break;
             case PieceType::BISHOP:
-                copy = new Bishop(color, x, y);
+                copy = new Bishop(color, x, y, true);
                 break;
             case PieceType::ROOK:
-                copy = new Rook(color, x, y);
+                copy = new Rook(color, x, y, true);
                 break;
             case PieceType::QUEEN:
-                copy = new Queen(color, x, y);
+                copy = new Queen(color, x, y, true);
                 break;
             case PieceType::KING:
-                copy = new King(color, x, y);
+                copy = new King(color, x, y, true);
                 break;
         }
         copy->setHash(piece->getHash());
+
+
         return copy;
     }
 

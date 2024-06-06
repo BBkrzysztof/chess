@@ -5,7 +5,8 @@
 class Bishop : public Piece {
 public:
 
-    Bishop(PieceColor color, int x, int y) : Piece(color, PieceType::BISHOP, x, y) {};
+    Bishop(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::BISHOP, x, y,
+                                                                           lightMode) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard moves = 0ULL;

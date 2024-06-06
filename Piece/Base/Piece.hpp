@@ -24,7 +24,7 @@ const std::map<PieceType, std::string> icons = {
 class Piece {
 public:
 
-    Piece(PieceColor color, PieceType type, int x, int y) {
+    Piece(PieceColor color, PieceType type, int x, int y, bool lightMode = false) {
 
         this->positionX = x * 100;
         this->positionY = y * 100;
@@ -32,23 +32,45 @@ public:
         this->pieceType = type;
         this->pieceColor = color;
 
-        if (!this->texture.loadFromFile(this->buildIconPath())) {
-            throw std::exception();
+        this->lightMode = lightMode;
+
+        if (!lightMode) {
+
+            this->sprite = new sf::Sprite();
+            this->texture = new sf::Texture;
+            this->background = new sf::RectangleShape();
+            this->circleShape = new sf::CircleShape();
+
+            if (!this->texture->loadFromFile(this->buildIconPath())) {
+                throw std::exception();
+            }
+
+            this->background->setSize(sf::Vector2f(100, 100));
+            this->background->setFillColor(bgColor);
+
+            this->sprite->setTexture(*this->texture);
         }
 
-        this->background.setSize(sf::Vector2f(100, 100));
-        this->background.setFillColor(bgColor);
-
-        this->sprite.setTexture(this->texture);
         this->resetPosition();
     }
 
+    virtual ~Piece() {
+        delete sprite;
+        delete texture;
+        delete background;
+        delete circleShape;
+    }
+
     void draw(sf::RenderTarget& target) {
-        if (this->selected) {
-            target.draw(this->background);
+        if (this->lightMode) {
+            return;
         }
 
-        target.draw(this->sprite);
+        if (this->selected) {
+            target.draw(*this->background);
+        }
+
+        target.draw(*this->sprite);
     }
 
     void move(int x, int y) {
@@ -58,7 +80,7 @@ public:
     }
 
     bool validateBounds(const sf::Vector2i& mousePosition) {
-        sf::FloatRect bounds = this->sprite.getGlobalBounds();
+        sf::FloatRect bounds = this->sprite->getGlobalBounds();
         return bounds.contains(static_cast<sf::Vector2f>(mousePosition));
     }
 
@@ -106,10 +128,6 @@ public:
         this->buildValidMoves(captures, occupied, lastMove);
     }
 
-    virtual ~Piece(){
-
-    }
-
 protected:
 
     virtual void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) = 0;
@@ -117,17 +135,21 @@ protected:
 private:
 
     void resetPosition() {
-        this->sprite.setPosition(
+        if (this->lightMode) {
+            return;
+        }
+
+        this->sprite->setPosition(
                 this->positionX,
                 this->positionY
         );
 
-        this->background.setPosition(
+        this->background->setPosition(
                 this->positionX,
                 this->positionY
         );
 
-        this->circleShape.setPosition(
+        this->circleShape->setPosition(
                 this->positionX,
                 this->positionY
         );
@@ -151,16 +173,16 @@ private:
     int positionX = 0;
     int positionY = 0;
 
-    bool selected = false;
-    bool beatable = false;
-
-    std::string hash;
-
     PieceColor pieceColor;
     PieceType pieceType;
 
-    sf::Sprite sprite;
-    sf::Texture texture;
-    sf::RectangleShape background;
-    sf::CircleShape circleShape;
+    bool selected = false;
+    bool lightMode;
+
+    std::string hash;
+
+    sf::Sprite* sprite = nullptr;
+    sf::Texture* texture = nullptr;
+    sf::RectangleShape* background = nullptr;
+    sf::CircleShape* circleShape = nullptr;
 };

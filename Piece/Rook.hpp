@@ -5,7 +5,7 @@
 class Rook : public Piece {
 public:
 
-    Rook(PieceColor color, int x, int y) : Piece(color, PieceType::ROOK, x, y) {};
+    Rook(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::ROOK, x, y, lightMode) {};
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard moves = 0ULL;

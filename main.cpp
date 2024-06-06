@@ -7,6 +7,7 @@
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 #include "Serivces/CheckMateService.hpp"
+#include "Engine/Engine.hpp"
 
 /**
  * @todo blokowanie innych ruchów wczasie szacha niż takie do ucieczki przed szachem
@@ -56,10 +57,18 @@ int main() {
         board->draw(window);
         window.display();
 
+        size_t x = sizeof(sf::Sprite*);
+
         if (gameState->getIsCheckMate()) {
             std::cout << "Mat" << std::endl;
             return 0;
         }
+
+
+
+        //        if (gameState->getTurn() == PieceColor::BLACK_PIECE) {
+        //            Engine::run(board, gameState, PieceColor::BLACK_PIECE, 1);
+        //        }
     }
 
     return 0;
