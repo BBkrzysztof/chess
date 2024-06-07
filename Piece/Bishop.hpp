@@ -35,7 +35,7 @@ public:
         return moves;
     }
 
-    ~Bishop() override {};
+    ~Bishop() override = default;
 
 protected:
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {

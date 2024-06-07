@@ -48,9 +48,16 @@ public:
         this->isCheck = gameState.isCheck;
         this->isCheckmate = gameState.isCheckmate;
         this->isStalemate = gameState.isStalemate;
-        this->moveHistory = gameState.moveHistory;
+//        this->moveHistory = gameState.moveHistory;
         this->validMoves = gameState.validMoves;
         this->captureMoves = gameState.captureMoves;
+    }
+
+    ~GameState() {
+
+        this->teams[PieceColor::WHITE_PIECE].clear();
+        this->teams[PieceColor::BLACK_PIECE].clear();
+        this->teams.clear();
     }
 
     Bitboard calcOccupied() const {

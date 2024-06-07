@@ -12,6 +12,7 @@ public:
     Move(Board* board, Piece* selectedPiece, const MoveIndicator* indicator, PopUpInterface* popUp = nullptr) {
         MovePieceService* service = new MovePieceService(board, board->gameState);
         service->move(selectedPiece, indicator, popUp);
+        delete service;
     }
 
 private:

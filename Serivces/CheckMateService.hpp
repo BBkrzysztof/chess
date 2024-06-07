@@ -12,6 +12,7 @@ public:
             auto* escape = new CheckMateService(board, gameState);
             auto isMat = escape->validate();
             gameState->setIsCheckMate(isMat);
+            delete escape;
         }
     }
 
@@ -36,7 +37,7 @@ private:
         for (Piece* piece: team) {
             //select each piece
             this->boardEntryCopy->setSelectedPiece(piece->getHash());
-            SelectPieceService::Select(piece, this->boardEntryCopy);
+            SelectPieceService::Select(piece, this->boardEntryCopy, true);
 
             if (!this->boardEntryCopy->getIndicators().empty()) {
                 isMat = false;

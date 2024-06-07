@@ -34,7 +34,7 @@ public:
         return moves;
     }
 
-    ~Rook() override {}
+    ~Rook() override = default;
 
 protected:
 

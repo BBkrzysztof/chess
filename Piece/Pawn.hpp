@@ -93,7 +93,7 @@ public:
         }
     }
 
-    ~Pawn() override {}
+    ~Pawn() override = default;
 
 protected:
 

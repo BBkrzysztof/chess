@@ -80,6 +80,14 @@ public:
         this->buildPanel(PieceType::QUEEN, 3);
     }
 
+    ~PopUp() {
+        for (const auto& element: this->panels) {
+            delete element;
+        }
+
+        this->panels.clear();
+    }
+
     PieceType draw() {
         sf::RenderWindow newWindow(sf::VideoMode(100, 400), "promotion", sf::Style::None);
 

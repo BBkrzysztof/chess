@@ -12,20 +12,22 @@ public:
         GameState* gameStateCopy = new GameState(*gameState);
         Board* boardCopy = new Board(*board, gameStateCopy);
 
+        auto* mock = CheckMoveSimulator::getMock();
+
         if (indicator->getMoveOption() == MoveOptions::Capture ||
             indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
             CapturePieceService::Capture(
                     boardCopy,
                     boardCopy->getSelectedPieceReference(),
                     indicator,
-                    CheckMoveSimulator::getMock()
+                    mock
             );
         } else {
             MovePieceService::Move(
                     boardCopy,
                     boardCopy->getSelectedPieceReference(),
                     indicator,
-                    CheckMoveSimulator::getMock()
+                    mock
             );
         }
         gameStateCopy->toggleTurn();
@@ -33,7 +35,7 @@ public:
 
         delete boardCopy;
         delete gameStateCopy;
-
+        delete mock;
         return result;
     }
 

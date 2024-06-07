@@ -49,7 +49,7 @@ public:
         return moves;
     }
 
-    ~Queen() override {}
+    ~Queen() override = default;
 
 protected:
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {

@@ -58,7 +58,8 @@ public:
             const Bitboard& kingSideCastle,
             const Bitboard& queenSideCastle,
             const Bitboard& promotions,
-            const Bitboard& captureAndPromotion
+            const Bitboard& captureAndPromotion,
+            bool lightMode = false
     );
 
     bool isCheck(bool dump = false);

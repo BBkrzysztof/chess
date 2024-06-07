@@ -5,9 +5,10 @@
 
 class SelectPieceService {
 public:
-    static void Select(Piece* piece, Board* board) {
+    static void Select(Piece* piece, Board* board, bool lightMode = false) {
         SelectPieceService* service = new SelectPieceService(board, board->gameState);
         service->selectPiece(piece);
+        delete service;
     }
 
 private:
@@ -17,7 +18,7 @@ private:
         this->gameState = gameState;
     }
 
-    void selectPiece(Piece* piece) {
+    void selectPiece(Piece* piece, bool lightMode = false) {
         this->board->setSelectedPiece(piece->getHash());
         this->gameState->kingCastleMove = 0ULL;
         this->gameState->queenCastleMove = 0ULL;
@@ -63,7 +64,8 @@ private:
                 this->gameState->kingCastleMove,
                 this->gameState->queenCastleMove,
                 this->gameState->promotionMove,
-                this->gameState->captureAndPromotionMove
+                this->gameState->captureAndPromotionMove,
+                lightMode
         );
 
         this->validateNotOpeningCheck();
@@ -178,9 +180,10 @@ private:
             }
         }
 
-        delete boardEntryCopy;
-
         this->board->setIndicators(validIndicators);
+
+        delete boardEntryCopy;
+        delete gameStateEntryCopy;
     }
 
     void ValidateCheckEscape() {
@@ -204,9 +207,10 @@ private:
             }
         }
 
-        delete boardEntryCopy;
-
         this->board->setIndicators(validIndicators);
+
+        delete boardEntryCopy;
+        delete gameStateEntryCopy;
     }
 
 private:

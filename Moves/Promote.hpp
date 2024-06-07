@@ -61,5 +61,6 @@ public:
         newInstruction.selectedPiece = piece;
 
         Move::move(newInstruction);
+        delete selectedPiece;
     }
 };

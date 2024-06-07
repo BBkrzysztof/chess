@@ -24,7 +24,7 @@ enum PieceType {
 class BitBoard {
 public:
 
-    static void dump(const Bitboard& bitboard, std::string title = "") {
+    static void dump(const Bitboard& bitboard, const std::string& title = "") {
 
         if (!title.empty()) {
             std::cout << "\n\n\n\n ======== " << title << " ======== \n\n\n\n";
@@ -60,7 +60,7 @@ public:
         return bitboard;
     }
 
-    static bool isSquareAttacked(Bitboard square, Bitboard attacked) {
+    static bool isSquareAttacked(const Bitboard& square, const Bitboard& attacked) {
         return (attacked & square) != 0;
     }
 
@@ -75,7 +75,7 @@ public:
         return y * 8 + x;
     }
 
-    static bool matchBitboard(Bitboard bitboard, int shift) {
+    static bool matchBitboard(const Bitboard& bitboard, int shift) {
         Bitboard d = 0LL << shift;
 
         return (bitboard & (d));

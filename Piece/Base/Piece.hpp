@@ -33,13 +33,11 @@ public:
         this->pieceColor = color;
 
         this->lightMode = lightMode;
-
-        if (!lightMode) {
-
-            this->sprite = new sf::Sprite();
-            this->texture = new sf::Texture;
+        if (this->lightMode == false) {
+            this->texture = new sf::Texture();
             this->background = new sf::RectangleShape();
             this->circleShape = new sf::CircleShape();
+            this->sprite = new sf::Sprite();
 
             if (!this->texture->loadFromFile(this->buildIconPath())) {
                 throw std::exception();
@@ -49,9 +47,8 @@ public:
             this->background->setFillColor(bgColor);
 
             this->sprite->setTexture(*this->texture);
+            this->resetPosition();
         }
-
-        this->resetPosition();
     }
 
     virtual ~Piece() {
@@ -62,7 +59,7 @@ public:
     }
 
     void draw(sf::RenderTarget& target) {
-        if (this->lightMode) {
+        if (this->lightMode == true) {
             return;
         }
 
@@ -135,7 +132,8 @@ protected:
 private:
 
     void resetPosition() {
-        if (this->lightMode) {
+
+        if (this->lightMode == true) {
             return;
         }
 

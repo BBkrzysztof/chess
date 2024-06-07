@@ -3,6 +3,8 @@
 #include "../Board/board.h"
 #include "../Moves/MoveInstruction.hpp"
 #include "../Serivces/SelectPieceService.hpp"
+#include "EvaluateBoard.hpp"
+
 #include <thread>
 
 struct bestMove {
@@ -15,9 +17,8 @@ public:
     static void run(Board* board, GameState* gameState, PieceColor team, int depth = 4) {
         Engine* engine = new Engine(board, gameState, depth, team);
         bestMove indicator = engine->start();
-
         Engine::makeMoveOnRealBoard(indicator, board);
-        int i = 0;
+        delete engine;
     }
 
 private:
@@ -27,25 +28,32 @@ private:
         this->maxDepth = depth;
         this->team = team;
         this->originBoard = board;
+        this->popUp = Engine::getMock();
     }
 
     ~Engine() {
         delete this->board;
         delete this->gameState;
+        delete this->popUp;
     }
 
     bestMove start() {
         auto currentTeam = this->gameState->getCurrentTeam();
         MoveIndicator bestIndicator;
-        Piece* piece;
+        Piece* piece = nullptr;
+        int bestValue = INT_MIN;
+
+        GameState* gameStateEntryCopy = new GameState(*board->gameState);
+        Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
+
         for (const auto& element: currentTeam) {
-            SelectPieceService::Select(element, board);
+            SelectPieceService::Select(element, boardEntryCopy, true);
 
-            for (const auto& indicator: this->board->indicators) {
 
-                GameState* gameStateCopy = new GameState(*this->board->gameState);
-                Board* boardCopy = new Board(*this->board, gameStateCopy);
-                int bestValue = INT_MIN;
+            for (const auto& indicator: boardEntryCopy->indicators) {
+
+                GameState* gameStateCopy = new GameState(*gameStateEntryCopy);
+                Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
 
                 if (indicator->getMoveOption() == MoveOptions::Capture ||
                     indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
@@ -53,19 +61,19 @@ private:
                             boardCopy,
                             boardCopy->getSelectedPieceReference(),
                             indicator,
-                            Engine::getMock()
+                            this->popUp
                     );
                 } else {
                     MovePieceService::Move(
                             boardCopy,
                             boardCopy->getSelectedPieceReference(),
                             indicator,
-                            Engine::getMock()
+                            this->popUp
                     );
                 }
 
 
-                int boardValue = this->minimax(board, this->maxDepth - 1);
+                int boardValue = this->minimax(boardCopy, this->maxDepth - 1);
 
                 if (boardValue > bestValue) {
                     bestValue = boardValue;
@@ -79,30 +87,41 @@ private:
 
         Piece* realPiece = this->originBoard->pieces[piece->getHash()];
 
+        delete boardEntryCopy;
+        delete gameStateEntryCopy;
+
         return {realPiece, bestIndicator};
     }
 
     int minimax(Board* board, int depth) {
 
+        auto color = board->gameState->getTurn();
+
+        GameState* gameStateEntryCopy = new GameState(*board->gameState);
+        Board* boardEntryCopy = new Board(*board, gameStateEntryCopy);
+
+
         if (depth <= 0) {
-            return this->evaluate(*board);
+            return EvaluateBoard::evaluate(boardEntryCopy, color);
         }
 
-        auto currentTeam = this->gameState->getCurrentTeam();
-
+        auto currentTeam = boardEntryCopy->gameState->getCurrentTeam();
+        int maxEval = INT_MIN;
+        int minEval = INT_MAX;
         for (const auto& element: currentTeam) {
 
-            SelectPieceService::Select(element, board);
+            SelectPieceService::Select(element, boardEntryCopy, true);
 
-            if (board->indicators.empty()) {
-                return this->evaluate(*board);
+            if (boardEntryCopy->indicators.empty()) {
+                return EvaluateBoard::evaluate(boardEntryCopy, color);
             }
 
-            for (const auto& indicator: board->indicators) {
 
-                GameState* gameStateCopy = new GameState(*board->gameState);
-                Board* boardCopy = new Board(*board, gameStateCopy);
-                int maxEval = INT_MIN;
+            for (const auto& indicator: boardEntryCopy->indicators) {
+
+                GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
+                Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+
 
                 if (indicator->getMoveOption() == MoveOptions::Capture ||
                     indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
@@ -110,98 +129,56 @@ private:
                             boardCopy,
                             boardCopy->getSelectedPieceReference(),
                             indicator,
-                            Engine::getMock()
+                            this->popUp
                     );
                 } else {
                     MovePieceService::Move(
                             boardCopy,
                             boardCopy->getSelectedPieceReference(),
                             indicator,
-                            Engine::getMock()
+                            this->popUp
                     );
                 }
 
                 int eval = this->minimax(board, depth - 1);
-                maxEval = std::max(maxEval, eval);
-                delete gameStateCopy;
-                delete boardCopy;
 
-                return maxEval;
+                delete boardCopy;
+                delete gameStateCopy;
+
+                if (color == this->team) {
+                    maxEval = std::max(maxEval, eval);
+                } else {
+                    minEval = std::min(minEval, eval);
+                }
             }
         }
+
+        delete boardEntryCopy;
+        delete gameStateEntryCopy;
+
+        return color == this->team ? maxEval : minEval;
     }
 
     static void makeMoveOnRealBoard(const bestMove indicator, Board* board) {
+        auto* mock = Engine::getMock();
         if (indicator.move.getMoveOption() == MoveOptions::Capture ||
             indicator.move.getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
             CapturePieceService::Capture(
                     board,
                     indicator.piece,
                     &indicator.move,
-                    Engine::getMock()
+                    mock
             );
         } else {
             MovePieceService::Move(
                     board,
                     indicator.piece,
                     &indicator.move,
-                    Engine::getMock()
+                    mock
             );
         }
-    }
 
-    int evaluate(const Board& board) {
-        int evaluation = 0;
-
-        // Ewaluacja pionków
-        Bitboard pawns = board.gameState->getBlackPawns();
-        while (pawns) {
-            int square = __builtin_ctzll(pawns); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 100; // Przykładowa wartość punktowa dla pionka
-            pawns &= pawns - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja skoczków
-        Bitboard knights = board.gameState->getBlackKing();
-        while (knights) {
-            int square = __builtin_ctzll(knights); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 300; // Przykładowa wartość punktowa dla skoczka
-            knights &= knights - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        Bitboard bishops =  board.gameState->getBlackBishops();
-        while (bishops) {
-            int square = __builtin_ctzll(bishops); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 300; // Przykładowa wartość punktowa dla gońca
-            bishops &= bishops - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja wież
-        Bitboard rooks =board.gameState->getBlackBishops();;
-        while (rooks) {
-            int square = __builtin_ctzll(rooks); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 500; // Przykładowa wartość punktowa dla wieży
-            rooks &= rooks - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja hetmanów
-        Bitboard queens =board.gameState->getBlackQueen();;
-        while (queens) {
-            int square = __builtin_ctzll(queens); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 900; // Przykładowa wartość punktowa dla hetmana
-            queens &= queens - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja króla
-        Bitboard kings = board.gameState->getBlackKing();
-        while (kings) {
-            int square = __builtin_ctzll(kings); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 10000; // Przykładowa wartość punktowa dla króla
-            kings &= kings - 1; // Wyczyść najmniej znaczący bit
-        }
-
-
-        return evaluation;
+        delete mock;
     }
 
     static PopUpInterface* getMock() {
@@ -224,6 +201,7 @@ private:
     Board* board;
     Board* originBoard;
     GameState* gameState;
+    PopUpInterface* popUp;
     int maxDepth;
     PieceColor team;
 };

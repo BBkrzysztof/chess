@@ -21,22 +21,24 @@ Board::Board(const Board& board, GameState* gameStateCopy, const std::vector<Mov
     }
 
     this->selectedPiece = board.selectedPiece;
-
-    this->indicators = indicators;
+    this->indicators.clear();
+    for (const auto& indicator: indicators) {
+        this->indicators.push_back(new MoveIndicator(*indicator));
+    }
 
     this->rebuildTeams();
 }
 
 Board::~Board() {
-    this->gameState->teams[PieceColor::WHITE_PIECE].clear();
-    this->gameState->teams[PieceColor::BLACK_PIECE].clear();
-
     for (const auto& piece: this->pieces) {
         delete piece.second;
-
     }
     this->pieces.clear();
-//
+
+    for (const auto& indicator: this->indicators) {
+        delete indicator;
+    }
+    this->indicators.clear();
 }
 
 void Board::draw(sf::RenderTarget& target) {
@@ -102,7 +104,13 @@ std::vector<MoveIndicator*> Board::getIndicators() {
 }
 
 void Board::setIndicators(const std::vector<MoveIndicator*>& indicators) {
-    this->indicators = indicators;
+    for (const auto& indicator: this->indicators) {
+        delete indicator;
+    }
+    this->indicators.clear();
+    for (const auto& indicator: indicators) {
+        this->indicators.push_back(new MoveIndicator(*indicator));
+    }
 }
 
 void Board::drawValidMoves(
@@ -111,7 +119,8 @@ void Board::drawValidMoves(
         const Bitboard& kingSideCastle,
         const Bitboard& queenSideCastle,
         const Bitboard& promotions,
-        const Bitboard& captureAndPromotion
+        const Bitboard& captureAndPromotion,
+        bool lightMode
 ) {
     for (const auto& item: this->indicators) {
         delete item;
@@ -120,27 +129,27 @@ void Board::drawValidMoves(
     for (int rank = 7; rank >= 0; --rank) {
         for (int file = 0; file < 8; ++file) {
             if (validMoves & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::Move, lightMode);
                 this->indicators.push_back(mi);
             }
             if (captureMoves & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank, MoveOptions::Capture);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::Capture, lightMode);
                 this->indicators.push_back(mi);
             }
             if (kingSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank, MoveOptions::KING_SIDE_CASTLE);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::KING_SIDE_CASTLE, lightMode);
                 this->indicators.push_back(mi);
             }
             if (queenSideCastle & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank, MoveOptions::QUEEN_SIDE_CASTLE);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::QUEEN_SIDE_CASTLE, lightMode);
                 this->indicators.push_back(mi);
             }
             if (promotions & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank, MoveOptions::PROMOTION);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::PROMOTION, lightMode);
                 this->indicators.push_back(mi);
             }
             if (captureAndPromotion & (1ULL << BitBoard::calcShift(file, rank))) {
-                auto* mi = new MoveIndicator(file, rank, MoveOptions::CAPTURE_AND_PROMOTION);
+                auto* mi = new MoveIndicator(file, rank, MoveOptions::CAPTURE_AND_PROMOTION, lightMode);
                 this->indicators.push_back(mi);
             }
         }

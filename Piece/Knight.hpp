@@ -24,7 +24,7 @@ public:
         return moves;
     }
 
-    ~Knight() override {}
+    ~Knight() override = default;
 
 protected:
 

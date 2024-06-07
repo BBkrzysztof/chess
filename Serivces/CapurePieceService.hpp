@@ -8,9 +8,11 @@
 
 class CapturePieceService {
 public:
-    static void Capture(Board* board, Piece* selectedPiece, const MoveIndicator* indicator, PopUpInterface* popUp = nullptr) {
+    static void
+    Capture(Board* board, Piece* selectedPiece, const MoveIndicator* indicator, PopUpInterface* popUp = nullptr) {
         CapturePieceService* service = new CapturePieceService(board, board->gameState);
         service->capture(selectedPiece, indicator, popUp);
+        delete service;
     }
 
 private:

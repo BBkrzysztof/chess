@@ -18,13 +18,15 @@ class CapturePieceListener : public EventListenerInterface {
                         if (indicator->validateBounds(mousePosition) &&
                             (indicator->getMoveOption() == MoveOptions::Capture ||
                              indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION)) {
-
+                            auto* popUp = new PopUp(selectedPiece->getPieceColor());
                             CapturePieceService::Capture(
                                     this->board,
                                     selectedPiece,
                                     indicator,
-                                    new PopUp(selectedPiece->getPieceColor())
+                                    popUp
                             );
+
+                            delete popUp;
 
                             this->board->isCheck();
                             CheckMateService::checkMate(this->board, this->gameState);
