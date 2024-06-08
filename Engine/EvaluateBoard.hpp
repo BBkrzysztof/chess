@@ -4,75 +4,41 @@
 #include "Engine.hpp"
 
 class EvaluateBoard {
-private:
+public:
 
-    static int pawnTable[64];
-    static int knightTable[64];
-    static int bishopTable[64];
-    static int rookTable[64];
-    static int queenTable[64];
-    static int kingTable[64];
+    static int blackPawnTable[64];
+    static int blackKnightTable[64];
+    static int blackBishopTable[64];
+    static int blackRookTable[64];
+    static int blackQueenTable[64];
+    static int blackKingTable[64];
+
+    static int whitePawnTable[64];
+    static int whiteKnightTable[64];
+    static int whiteBishopTable[64];
+    static int whiteRookTable[64];
+    static int whiteQueenTable[64];
+    static int whiteKingTable[64];
 
     static int evaluate(const Board* board, PieceColor turnColor) {
         int evaluation = 0;
+        int evaluation1 = 0;
+        auto enemy = EvaluateBoard::getOpponentColor(turnColor);
+        evaluation = EvaluateBoard::evaluatePieces(board, turnColor);
+        evaluation1 = EvaluateBoard::evaluatePieces(board, enemy);
 
-        evaluation += EvaluateBoard::evaluatePieces(board, turnColor);
-        evaluation -= EvaluateBoard::evaluatePieces(board, EvaluateBoard::getOpponentColor(turnColor));
-
-        return evaluation;
+        return evaluation - evaluation1;
     }
-
 
     static int evaluatePieces(const Board* board, PieceColor turnColor) {
         int evaluation = 0;
-        Bitboard pawns = board->gameState->getBitBoard(PieceType::PAWN, turnColor);
-        Bitboard knights = board->gameState->getBitBoard(PieceType::KNIGHT, turnColor);
-        Bitboard bishops = board->gameState->getBitBoard(PieceType::BISHOP, turnColor);
-        Bitboard rooks = board->gameState->getBitBoard(PieceType::ROOK, turnColor);
-        Bitboard queens = board->gameState->getBitBoard(PieceType::QUEEN, turnColor);
-        Bitboard kings = board->gameState->getBitBoard(PieceType::KING, turnColor);
 
-
-        // Ewaluacja pionków
-        while (pawns) {
-            int square = __builtin_ctzll(pawns); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 100 + EvaluateBoard::pawnTable[square]; // Przykładowa wartość punktowa dla pionka
-            pawns &= pawns - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja skoczków
-        while (knights) {
-            int square = __builtin_ctzll(knights); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 300 + EvaluateBoard::knightTable[square]; // Przykładowa wartość punktowa dla skoczka
-            knights &= knights - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        while (bishops) {
-            int square = __builtin_ctzll(bishops); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 300 + EvaluateBoard::bishopTable[square]; // Przykładowa wartość punktowa dla gońca
-            bishops &= bishops - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja wież
-        while (rooks) {
-            int square = __builtin_ctzll(rooks); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 500 + EvaluateBoard::rookTable[square]; // Przykładowa wartość punktowa dla wieży
-            rooks &= rooks - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja hetmanów
-        while (queens) {
-            int square = __builtin_ctzll(queens); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 900 + EvaluateBoard::queenTable[square]; // Przykładowa wartość punktowa dla hetmana
-            queens &= queens - 1; // Wyczyść najmniej znaczący bit
-        }
-
-        // Ewaluacja króla
-        while (kings) {
-            int square = __builtin_ctzll(kings); // Znajdź indeks pierwszego ustawionego bitu
-            evaluation += 10000 + EvaluateBoard::kingTable[square]; // Przykładowa wartość punktowa dla króla
-            kings &= kings - 1; // Wyczyść najmniej znaczący bit
-        }
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::PAWN, turnColor);
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::KNIGHT, turnColor);
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::BISHOP, turnColor);
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::ROOK, turnColor);
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::QUEEN, turnColor);
+        evaluation += EvaluateBoard::evaluateSinglePiecePosition(board, PieceType::KING, turnColor);
 
         return evaluation;
     }
@@ -82,41 +48,65 @@ private:
             return PieceColor::WHITE_PIECE;
         } else {
             return PieceColor::BLACK_PIECE;
+        }
+    }
+
+    static int evaluateSinglePiecePosition(const Board* board, const PieceType& type, const PieceColor& color) {
+        Bitboard position = board->gameState->getBitBoard(type, color);
+
+        int evaluation = 0;
+
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                int shift = BitBoard::calcShift(file, rank);
+                if (position & (1ULL << shift)) {
+                    int* weightsTable = EvaluateBoard::getPieceWeights(type, color);
+                    int weight = EvaluateBoard::getPieceWeight(type);
+
+                    evaluation += weight + weightsTable[shift];  // Przykładowa wartość punktowa dla pionka
+
+                }
+            }
+        }
+
+        return evaluation;
+    }
+
+    static int* getPieceWeights(const PieceType& type, const PieceColor& color) {
+        switch (type) {
+            case PieceType::PAWN:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whitePawnTable : EvaluateBoard::blackPawnTable;
+            case PieceType::KNIGHT:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whiteKnightTable
+                                                        : EvaluateBoard::blackKnightTable;
+            case PieceType::BISHOP:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whiteBishopTable
+                                                        : EvaluateBoard::blackBishopTable;
+            case PieceType::ROOK:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whiteRookTable : EvaluateBoard::blackRookTable;
+            case PieceType::QUEEN:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whiteQueenTable
+                                                        : EvaluateBoard::blackQueenTable;
+            case PieceType::KING:
+                return color == PieceColor::WHITE_PIECE ? EvaluateBoard::whiteKingTable : EvaluateBoard::blackKingTable;
 
         }
     }
 
-    static int evaluateMove(const MoveIndicator& move, const Board* board) {
-        if (move.getMoveOption() == MoveOptions::Capture ||
-            move.getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
-            // MVV-LVA: Wartość bicia najcenniejszej figury najmniej cenną figurą
-            Piece* target = board->getPieceByPosition(move.getPositionX(), move.getPositionY());
-            Piece* attacker = board->getSelectedPieceReference();
-            int targetValue = EvaluateBoard::getPieceValue(target->getPieceType());
-            int attackerValue = EvaluateBoard::getPieceValue(attacker->getPieceType());
-            return targetValue - attackerValue;
-        }
-        // Preferuj ruchy promujące pionki
-        if (move.getMoveOption() == MoveOptions::PROMOTION) {
-            return 900; // Wartość hetmana
-        }
-        return 0; // Inne ruchy
-    }
-
-    static int getPieceValue(PieceType type) {
+    static int getPieceWeight(const PieceType& type) {
         switch (type) {
             case PieceType::PAWN:
                 return 100;
             case PieceType::KNIGHT:
-                return 300;
+                return 310;
             case PieceType::BISHOP:
-                return 300;
+                return 330;
             case PieceType::ROOK:
                 return 500;
             case PieceType::QUEEN:
                 return 900;
             case PieceType::KING:
-                return 10000;
+                return 20000;
             default:
                 return 0;
         }
@@ -126,42 +116,86 @@ private:
 };
 
 
-int EvaluateBoard::pawnTable[64] = {
+int EvaluateBoard::blackPawnTable[64] = {
         0, 0, 0, 0, 0, 0, 0, 0,
-        5, 5, 5, -10, -10, 5, 5, 5,
-        5, -5, -5, 0, 0, -5, -5, 5,
-        0, 0, 0, 15, 15, 0, 0, 0,
+        5, -5, -10, 0, 0, -10, -5, 5,
+        0, 0, 0, -10, -10, 0, 0, 0,
         5, 5, 10, 20, 20, 10, 5, 5,
-        10, 10, 35, 30, 35, 20, 10, 10,
-        20, 20, 40, 45, 45, 40, 20, 20,
+        10, 10, 20, 40, 40, 20, 10, 10,
+        30, 30, 40, 60, 60, 40, 30, 30,
+        90, 90, 90, 90, 90, 90, 90, 90,
         0, 0, 0, 0, 0, 0, 0, 0
 };
 
-int EvaluateBoard::knightTable[64] = {
+int EvaluateBoard::whitePawnTable[64] = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        90, 90, 90, 90, 90, 90, 90, 90,
+        30, 30, 40, 60, 60, 40, 30, 30,
+        10, 10, 20, 40, 40, 20, 10, 10,
+        5, 5, 10, 20, 20, 10, 5, 5,
+        0, 0, 0, -10, -10, 0, 0, 0,
+        5, -5, -10, 0, 0, -10, -5, 5,
+        0, 0, 0, 0, 0, 0, 0, 0
+};
+
+int EvaluateBoard::blackKnightTable[64] = {
+        -50, -40, -30, -30, -30, -30, -40, -50,
+        -40, -20, 0, 0, 0, 0, -20, -40,
+        -30, 5, 10, 15, 15, 10, 5, -30,
+        -30, 5, 15, 20, 20, 15, 5, -30,
+        -30, 5, 15, 20, 20, 15, 5, -30,
+        -30, 5, 10, 15, 15, 10, 5, -30,
+        -40, -20, 0, 5, 5, 0, -20, -40,
+        -50, -40, -30, -30, -30, -30, -40, -50,
+};
+
+int EvaluateBoard::whiteKnightTable[64] = {
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20, 0, 5, 5, 0, -20, -40,
         -30, 5, 10, 15, 15, 10, 5, -30,
-        -30, 0, 15, 20, 20, 15, 0, -30,
         -30, 5, 15, 20, 20, 15, 5, -30,
-        -30, 0, 10, 15, 15, 10, 0, -30,
+        -30, 5, 15, 20, 20, 15, 5, -30,
+        -30, 5, 10, 15, 15, 10, 5, -30,
         -40, -20, 0, 0, 0, 0, -20, -40,
         -50, -40, -30, -30, -30, -30, -40, -50
 };
 
-int EvaluateBoard::bishopTable[64] = {
+int EvaluateBoard::blackBishopTable[64] = {
+        -20, -10, -10, -10, -10, -10, -10, -20,
+        -10, 5, 0, 0, 0, 0, 5, -10,
+        -10, 10, 10, 10, 10, 10, 10, -10,
+        -10, 0, 10, 15, 15, 10, 0, -10,
+        -10, 5, 10, 15, 15, 10, 5, -10,
+        -10, 0, 10, 10, 10, 10, 0, -10,
+        -10, 0, 0, 0, 0, 0, 0, -10,
+        -20, -10, -10, -10, -10, -10, -10, -20
+};
+
+int EvaluateBoard::whiteBishopTable[64] = {
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10, 0, 0, 0, 0, 0, 0, -10,
         -10, 0, 5, 10, 10, 5, 0, -10,
         -10, 5, 5, 10, 10, 5, 5, -10,
-        -10, 0, 10, 10, 10, 10, 0, -10,
+        -10, 0, 10, 15, 15, 10, 0, -10,
         -10, 10, 10, 10, 10, 10, 10, -10,
         -10, 5, 0, 0, 0, 0, 5, -10,
         -20, -10, -10, -10, -10, -10, -10, -20
 };
 
-int EvaluateBoard::rookTable[64] = {
+int EvaluateBoard::blackRookTable[64] = {
+        0, 0, 0, 5, 5, 0, 0, 0,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        5, 20, 20, 20, 20, 20, 20, 5,
         0, 0, 0, 0, 0, 0, 0, 0,
-        5, 10, 10, 10, 10, 10, 10, 5,
+};
+
+int EvaluateBoard::whiteRookTable[64] = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        5, 20, 20, 20, 20, 20, 20, 5,
         -5, 0, 0, 0, 0, 0, 0, -5,
         -5, 0, 0, 0, 0, 0, 0, -5,
         -5, 0, 0, 0, 0, 0, 0, -5,
@@ -170,24 +204,46 @@ int EvaluateBoard::rookTable[64] = {
         0, 0, 0, 5, 5, 0, 0, 0
 };
 
-int EvaluateBoard::queenTable[64] = {
+int EvaluateBoard::blackQueenTable[64] = {
         -20, -10, -10, -5, -5, -10, -10, -20,
-        -10, 0, 0, 0, 0, 0, 0, -10,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -5, 0, 5, 5, 5, 5, 0, -5,
-        0, 0, 5, 5, 5, 5, 0, -5,
-        -10, 5, 5, 5, 5, 5, 0, -10,
         -10, 0, 5, 0, 0, 0, 0, -10,
+        -10, 5, 5, 5, 5, 5, 0, -10,
+        -5, 0, 5, 10, 10, 5, 0, -5,
+        -5, 0, 5, 10, 10, 5, 0, -5,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -10, 0, 0, 0, 0, 0, 0, -10,
         -20, -10, -10, -5, -5, -10, -10, -20
 };
 
-int EvaluateBoard::kingTable[64] = {
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -20, -30, -30, -40, -40, -30, -30, -20,
-        -10, -20, -20, -20, -20, -20, -20, -10,
-        20, 20, 0, 0, 0, 0, 20, 20,
-        20, 30, 10, 0, 0, 10, 30, 20
+int EvaluateBoard::whiteQueenTable[64] = {
+        -20, -10, -10, -5, -5, -10, -10, -20,
+        -10, 0, 0, 0, 0, 0, 0, -10,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -5, 0, 5, 10, 10, 5, 0, -5,
+        -5, 0, 5, 10, 10, 5, 0, -5,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -10, 0, 0, 0, 0, 0, 0, -10,
+        -20, -10, -10, -5, -5, -10, -10, -20
+};
+
+int EvaluateBoard::blackKingTable[64] = {
+        -50, -40, -30, -20, -20, -30, -40, -50,
+        -30, -20, -10, 0, 0, -10, -20, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -30, 0, 0, 0, 0, -30, -30,
+        -50, -30, -30, -30, -30, -30, -30, -50
+};
+
+int EvaluateBoard::whiteKingTable[64] = {
+        -50, -30, -30, -30, -30, -30, -30, -50,
+        -30, -30, 0, 0, 0, 0, -30, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -20, -10, 0, 0, -10, -20, -30,
+        -50, -40, -30, -20, -20, -30, -40, -50
 };

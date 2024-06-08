@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MoveInstruction.hpp"
+//#include "../Engine/EvaluateBoard.hpp"
 
 class Move {
 public:
@@ -41,6 +42,10 @@ public:
                 captured ? MoveOptions::Capture : MoveOptions::Move,
                 selectedPiece
         );
+
+//        int result = EvaluateBoard::evaluate(board, gameState->getTurn());
+//        std::string t = gameState->getTurn() == PieceColor::WHITE_PIECE ? "bialy" : "czarny";
+//        std::cout << t << "   " << result << std::endl;
 
         gameState->toggleTurn();
         board->setSelectedPiece("");
