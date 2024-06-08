@@ -2,10 +2,19 @@
 
 #include "Base/Piece.hpp"
 
+const sf::Color checkColor(237, 78, 92);
+
 class King : public Piece {
 public:
 
-    King(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::KING, x, y, lightMode) {};
+    King(PieceColor color, int x, int y, bool lightMode = false) : Piece(color, PieceType::KING, x, y, lightMode) {
+        this->checkCircle = new sf::CircleShape(50);
+        this->checkCircle->setFillColor(checkColor);
+        this->checkCircle->setPosition(
+                x * 100,
+                y * 100
+        );
+    };
 
     static Bitboard getValidMoves(int position, Bitboard occupied) {
         Bitboard bitboard = 1ULL << position;
@@ -29,7 +38,32 @@ public:
         return moves;
     }
 
-    ~King() override = default;
+    ~King() override {
+        delete this->checkCircle;
+    };
+
+    void draw(sf::RenderTarget& target) {
+        if (this->lightMode == true) {
+            return;
+        }
+
+
+        if (this->selected) {
+            target.draw(*this->background);
+        }
+
+        if (this->check) {
+            target.draw(*this->checkCircle);
+        }
+
+        target.draw(*this->sprite);
+    }
+
+public:
+    void setCheck(bool check = false) {
+        this->check = check;
+    }
+
 
 protected:
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
@@ -38,5 +72,6 @@ protected:
         this->validMoves = King::getValidMoves(i, occupied);
     }
 
-
+    bool check = false;
+    sf::CircleShape* checkCircle = nullptr;
 };

@@ -16,15 +16,22 @@ private:
     void onEvent(sf::Event event) final {
 
         sf::Vector2i mousePosition = sf::Mouse::getPosition(*this->window);
-        auto pieces = this->board->getPieces();
-
+        auto pieces = this->gameState->getCurrentTeam();
         for (const auto& element: pieces) {
-            if (element.second->validateBounds(mousePosition)) {
+            if (element->validateBounds(mousePosition)) {
                 this->window->setMouseCursor(this->pointer);
-            } else {
-                this->window->setMouseCursor(this->arrow);
+                return;
             }
         }
+
+        for (const auto& element: this->board->getIndicators()) {
+            if (element->validateBounds(mousePosition)) {
+                this->window->setMouseCursor(this->pointer);
+                return;
+            }
+        }
+
+        this->window->setMouseCursor(this->arrow);
     }
 
 private:

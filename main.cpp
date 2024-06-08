@@ -8,6 +8,7 @@
 #include "EventDispatcher/Listeners/SelectPieceListener.hpp"
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
+#include "EventDispatcher/Listeners/HoverPieceListener.hpp"
 #include "Engine/Engine.hpp"
 
 /**
@@ -25,13 +26,19 @@ int main() {
 
     EventDispatcher::registerListener(
             sf::Event::Closed,
-            new CloseWindowListener
+            new CloseWindowListener,
+            1001
     );
 
     EventDispatcher::registerListener(
             sf::Event::MouseButtonPressed,
             new SelectPieceListener,
             1000
+    );
+
+    EventDispatcher::registerListener(
+            sf::Event::MouseMoved,
+            new HoverPieceListener
     );
 
     EventDispatcher::registerListener(
@@ -58,7 +65,9 @@ int main() {
 
 
         if (gameState->getIsCheckMate()) {
+            std::string a;
             std::cout << "Mat" << std::endl;
+            std::cin >> a;
             return 0;
         }
 

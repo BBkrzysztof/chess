@@ -64,7 +64,7 @@ public:
             bool lightMode = false
     );
 
-    bool isCheck(bool dump = false);
+    bool isCheck(bool lightMode = false);
 
     void rebuildTeams();
 

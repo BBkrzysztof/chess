@@ -58,18 +58,6 @@ public:
         delete this->circleShape;
     }
 
-    void draw(sf::RenderTarget& target) {
-        if (this->lightMode == true) {
-            return;
-        }
-
-        if (this->selected) {
-            target.draw(*this->background);
-        }
-
-        target.draw(*this->sprite);
-    }
-
     void move(int x, int y) {
         this->positionX = x * 100;
         this->positionY = y * 100;
@@ -125,10 +113,26 @@ public:
         this->buildValidMoves(captures, occupied, lastMove);
     }
 
+    virtual void draw(sf::RenderTarget& target) {
+        if (this->lightMode == true) {
+            return;
+        }
+
+        if (this->selected) {
+            target.draw(*this->background);
+        }
+
+        target.draw(*this->sprite);
+    }
+
 protected:
 
     virtual void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) = 0;
 
+    bool lightMode;
+    bool selected = false;
+    sf::RectangleShape* background = nullptr;
+    sf::Sprite* sprite = nullptr;
 private:
 
     void resetPosition() {
@@ -174,13 +178,8 @@ private:
     PieceColor pieceColor;
     PieceType pieceType;
 
-    bool selected = false;
-    bool lightMode;
-
     std::string hash;
 
-    sf::Sprite* sprite = nullptr;
     sf::Texture* texture = nullptr;
-    sf::RectangleShape* background = nullptr;
     sf::CircleShape* circleShape = nullptr;
 };

@@ -2,10 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 
-sf::Color gray(176, 196, 222);
-sf::Color capture(250, 245, 160);
-sf::Color castle(173, 216, 230);
-sf::Color promotion(100, 216, 230);
+const sf::Color gray(176, 196, 222);
+const sf::Color capture(250, 245, 160);
+const sf::Color castle(173, 216, 230);
+const sf::Color promotion(100, 216, 230);
 
 enum MoveOptions {
     Move = 1,

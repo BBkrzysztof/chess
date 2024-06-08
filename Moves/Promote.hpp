@@ -61,6 +61,9 @@ public:
         newInstruction->selectedPiece = piece;
 
         Move::move(newInstruction);
+
+        gameState->toggleTurn();
+        board->setSelectedPiece("");
         delete selectedPiece;
     }
 };

@@ -2,6 +2,7 @@
 
 #include "Base/Piece.hpp"
 
+
 class Knight : public Piece {
 public:
 
@@ -24,8 +25,6 @@ public:
         return moves;
     }
 
-    ~Knight() override = default;
-
 protected:
 
     void buildValidMoves(Bitboard captures, Bitboard occupied, MoveHistoryElement* lastMove) final {
@@ -33,4 +32,5 @@ protected:
 
         this->validMoves = Knight::getValidMoves(i, occupied);
     }
+
 };

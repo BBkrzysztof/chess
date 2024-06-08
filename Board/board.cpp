@@ -165,18 +165,19 @@ bool Board::isCheck(bool dump) {
             isEnemyWhite ? PieceColor::BLACK_PIECE : PieceColor::WHITE_PIECE);
 
     Bitboard kingPosition = this->gameState->getBitBoard(PieceType::KING, color);
-    if (dump) {
-        BitBoard::dump(kingPosition, "king");
-        BitBoard::dump(attacks, "attack");
-    }
 
-    if ((kingPosition & attacks) != 0LL) {
-        this->gameState->setIsCheck(true);
-        return true;
-    } else {
-        this->gameState->setIsCheck(false);
-        return false;
-    }
+    King* king = dynamic_cast<King*>(this->pieces.at(isEnemyWhite ? WHITE_KING : BLACK_KING));
+    King* otherKing = dynamic_cast<King*>(this->pieces.at(!isEnemyWhite ? WHITE_KING : BLACK_KING));
+
+    bool isCheck = (kingPosition & attacks) != 0LL;
+
+    otherKing->setCheck(false);
+    king->setCheck(false);
+
+    this->gameState->setIsCheck(isCheck);
+    king->setCheck(isCheck);
+
+    return isCheck;
 }
 
 void Board::registerPawns() {
