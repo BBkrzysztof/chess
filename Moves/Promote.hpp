@@ -5,12 +5,12 @@
 
 class Promote {
 public:
-    static void promote(const MoveInstruction& instruction) {
-        auto gameState = instruction.gameState;
-        auto board = instruction.board;
+    static void promote(const MoveInstruction* instruction) {
+        auto gameState = instruction->gameState;
+        auto board = instruction->board;
         auto pieces = board->pieces;
-        auto selectedPiece = instruction.selectedPiece;
-        auto type = instruction.selectedType;
+        auto selectedPiece = instruction->selectedPiece;
+        auto type = instruction->selectedType;
 
         int oldX = selectedPiece->getPositionX() / 100;
         int oldY = selectedPiece->getPositionY() / 100;
@@ -57,8 +57,8 @@ public:
 
         board->setPieces(pieces);
 
-        MoveInstruction newInstruction = instruction;
-        newInstruction.selectedPiece = piece;
+        MoveInstruction* newInstruction = new MoveInstruction(*instruction);
+        newInstruction->selectedPiece = piece;
 
         Move::move(newInstruction);
         delete selectedPiece;

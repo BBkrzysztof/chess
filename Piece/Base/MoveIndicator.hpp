@@ -54,7 +54,11 @@ public:
         this->positionX = other.positionX;
         this->positionY = other.positionY;
         this->moveOption = other.moveOption;
-        this->circleShape = new sf::CircleShape(*other.circleShape);
+        if (!other.lightMode) {
+            this->circleShape = new sf::CircleShape(*other.circleShape);
+        } else {
+            this->circleShape = nullptr;
+        }
         this->lightMode = other.lightMode;
     }
 

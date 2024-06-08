@@ -101,8 +101,14 @@ private:
         Board* boardEntryCopy = new Board(*board, gameStateEntryCopy);
 
 
-        if (depth <= 0) {
-            return EvaluateBoard::evaluate(boardEntryCopy, color);
+        if (depth == 0) {
+
+            int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
+
+            delete boardEntryCopy;
+            delete gameStateEntryCopy;
+
+            return eval;
         }
 
         auto currentTeam = boardEntryCopy->gameState->getCurrentTeam();
@@ -113,7 +119,12 @@ private:
             SelectPieceService::Select(element, boardEntryCopy, true);
 
             if (boardEntryCopy->indicators.empty()) {
-                return EvaluateBoard::evaluate(boardEntryCopy, color);
+                int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
+
+                delete boardEntryCopy;
+                delete gameStateEntryCopy;
+
+                return eval;
             }
 
 

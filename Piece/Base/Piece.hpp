@@ -52,10 +52,10 @@ public:
     }
 
     virtual ~Piece() {
-        delete sprite;
-        delete texture;
-        delete background;
-        delete circleShape;
+        delete this->sprite;
+        delete this->texture;
+        delete this->background;
+        delete this->circleShape;
     }
 
     void draw(sf::RenderTarget& target) {

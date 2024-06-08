@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include <thread>
+
 #include "Piece/Base/Piece.hpp"
 #include "Board/board.cpp"
 #include "EventDispatcher/EventDispatcher.hpp"
@@ -7,6 +9,7 @@
 #include "EventDispatcher/Listeners/MovePieceListener.hpp"
 #include "EventDispatcher/Listeners/CapturePieceListener.hpp"
 #include "Engine/Engine.hpp"
+
 /**
  * @todo better min-max
  */
@@ -60,9 +63,11 @@ int main() {
         }
 
         if (gameState->getTurn() == PieceColor::BLACK_PIECE) {
-            { Engine::run(board, gameState, PieceColor::BLACK_PIECE, 3); }
+            std::thread t(Engine::run, board, gameState, PieceColor::BLACK_PIECE, 3);
+            t.join();
         }
     }
+
 
     return 0;
 }

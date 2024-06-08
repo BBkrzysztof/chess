@@ -4,11 +4,11 @@
 
 class Castle {
 public:
-    static void castle(const MoveInstruction& instruction) {
-        auto gameState = instruction.gameState;
-        auto board = instruction.board;
-        auto options = instruction.options;
-        auto pieceColor = instruction.pieceColor;
+    static void castle(const MoveInstruction* instruction) {
+        auto gameState = instruction->gameState;
+        auto board = instruction->board;
+        auto options = instruction->options;
+        auto pieceColor = instruction->pieceColor;
         auto pieces = board->pieces;
 
         int oldX = 0, oldY = 0;

@@ -4,13 +4,13 @@
 
 class Capture {
 public:
-    static void capture(const MoveInstruction& instruction) {
-        auto gameState = instruction.gameState;
-        auto board = instruction.board;
+    static void capture(const MoveInstruction* instruction) {
+        auto gameState = instruction->gameState;
+        auto board = instruction->board;
         auto pieces = board->pieces;
 
-        auto oldX = instruction.oldX;
-        auto oldY = instruction.oldY;
+        auto oldX = instruction->oldX;
+        auto oldY = instruction->oldY;
 
         auto result = std::find_if(
                 pieces.begin(),

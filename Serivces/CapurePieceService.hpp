@@ -23,30 +23,32 @@ private:
 
     void capture(Piece* selectedPiece, const MoveIndicator* indicator, PopUpInterface* popUp) {
 
-        MoveInstruction instruction;
-        instruction.board = this->board;
-        instruction.gameState = this->gameState;
-        instruction.selectedPiece = selectedPiece;
+        MoveInstruction* instruction = new MoveInstruction();
+        instruction->board = this->board;
+        instruction->gameState = this->gameState;
+        instruction->selectedPiece = selectedPiece;
 
         this->gameState->markFirstMove(selectedPiece);
-        instruction.oldX = indicator->getPositionX();
-        instruction.oldY = indicator->getPositionY();
+        instruction->oldX = indicator->getPositionX();
+        instruction->oldY = indicator->getPositionY();
         Capture::capture(instruction);
 
 
         if (indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
-            instruction.newX = indicator->getPositionX();
-            instruction.newY = indicator->getPositionY();
-            instruction.selectedType = popUp->draw();
+            instruction->newX = indicator->getPositionX();
+            instruction->newY = indicator->getPositionY();
+            instruction->selectedType = popUp->draw();
 
             Promote::promote(instruction);
 
         } else {
-            instruction.newX = indicator->getPositionX();
-            instruction.newY = indicator->getPositionY();
-            instruction.captured = true;
+            instruction->newX = indicator->getPositionX();
+            instruction->newY = indicator->getPositionY();
+            instruction->captured = true;
             Move::move(instruction);
         }
+
+        delete instruction;
     }
 
 private:

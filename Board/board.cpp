@@ -39,6 +39,7 @@ Board::~Board() {
         delete indicator;
     }
     this->indicators.clear();
+    this->gameState = nullptr;
 }
 
 void Board::draw(sf::RenderTarget& target) {

@@ -7,7 +7,7 @@ class SelectPieceService {
 public:
     static void Select(Piece* piece, Board* board, bool lightMode = false) {
         SelectPieceService* service = new SelectPieceService(board, board->gameState);
-        service->selectPiece(piece);
+        service->selectPiece(piece, lightMode);
         delete service;
     }
 
