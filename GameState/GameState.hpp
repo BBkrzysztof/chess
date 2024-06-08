@@ -251,15 +251,15 @@ public:
         Bitboard occupied = this->calcOccupied();
 
         if (!isWhite) {
-            if (this->whiteKingMoved || this->whiteCastleMoved) return false;
+            if (this->blackKingMoved || this->blackCastleMoved) return false;
             Bitboard attacked = this->getAttackedSquares(PieceColor::WHITE_PIECE);
 
             if (kingSide) {
-                if (this->whiteRookH1Moved) return false;
+                if (this->blackRookH8Moved) return false;
                 if (occupied & (0x60ULL)) return false;
                 if (BitBoard::isSquareAttacked(0x60ULL, attacked)) return false;
             } else {
-                if (this->whiteRookA1Moved) return false;
+                if (this->blackRookA8Moved) return false;
                 if (occupied & (0xEULL)) return false;
                 if (BitBoard::isSquareAttacked(0xEULL, attacked)) return false;
             }
@@ -267,13 +267,13 @@ public:
         } else {
             Bitboard attacked = this->getAttackedSquares(PieceColor::BLACK_PIECE);
 
-            if (this->blackKingMoved || this->blackCastleMoved) return false;
+            if (this->whiteKingMoved || this->whiteCastleMoved) return false;
             if (kingSide) {
-                if (this->blackRookH8Moved) return false;
+                if (this->whiteRookH1Moved) return false;
                 if (occupied & (0x6000000000000000ULL)) return false;
                 if (BitBoard::isSquareAttacked(0x6000000000000000ULL, attacked)) return false;
             } else {
-                if (this->blackRookA8Moved) return false;
+                if (this->whiteRookA1Moved) return false;
                 if (occupied & (0xE00000000000000ULL)) return false;
                 if (BitBoard::isSquareAttacked(0xE00000000000000ULL, attacked)) return false;
             }

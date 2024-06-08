@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MoveInstruction.hpp"
-//#include "../Engine/EvaluateBoard.hpp"
 
 class Move {
 public:

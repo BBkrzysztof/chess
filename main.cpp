@@ -71,9 +71,9 @@ int main() {
             return 0;
         }
 
-        if (gameState->getTurn() == PieceColor::BLACK_PIECE) {
-            Engine::run(board, gameState, PieceColor::BLACK_PIECE, 3);
-        }
+//        if (gameState->getTurn() == PieceColor::BLACK_PIECE) {
+//            Engine::run(board, gameState, PieceColor::BLACK_PIECE, 3);
+//        }
     }
 
 
