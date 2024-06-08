@@ -13,8 +13,17 @@ private:
     static int queenTable[64];
     static int kingTable[64];
 
-
     static int evaluate(const Board* board, PieceColor turnColor) {
+        int evaluation = 0;
+
+        evaluation += EvaluateBoard::evaluatePieces(board, turnColor);
+        evaluation -= EvaluateBoard::evaluatePieces(board, EvaluateBoard::getOpponentColor(turnColor));
+
+        return evaluation;
+    }
+
+
+    static int evaluatePieces(const Board* board, PieceColor turnColor) {
         int evaluation = 0;
         Bitboard pawns = board->gameState->getBitBoard(PieceType::PAWN, turnColor);
         Bitboard knights = board->gameState->getBitBoard(PieceType::KNIGHT, turnColor);
@@ -66,6 +75,51 @@ private:
         }
 
         return evaluation;
+    }
+
+    static PieceColor getOpponentColor(const PieceColor& color) {
+        if (color == PieceColor::BLACK_PIECE) {
+            return PieceColor::WHITE_PIECE;
+        } else {
+            return PieceColor::BLACK_PIECE;
+
+        }
+    }
+
+    static int evaluateMove(const MoveIndicator& move, const Board* board) {
+        if (move.getMoveOption() == MoveOptions::Capture ||
+            move.getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
+            // MVV-LVA: Wartość bicia najcenniejszej figury najmniej cenną figurą
+            Piece* target = board->getPieceByPosition(move.getPositionX(), move.getPositionY());
+            Piece* attacker = board->getSelectedPieceReference();
+            int targetValue = EvaluateBoard::getPieceValue(target->getPieceType());
+            int attackerValue = EvaluateBoard::getPieceValue(attacker->getPieceType());
+            return targetValue - attackerValue;
+        }
+        // Preferuj ruchy promujące pionki
+        if (move.getMoveOption() == MoveOptions::PROMOTION) {
+            return 900; // Wartość hetmana
+        }
+        return 0; // Inne ruchy
+    }
+
+    static int getPieceValue(PieceType type) {
+        switch (type) {
+            case PieceType::PAWN:
+                return 100;
+            case PieceType::KNIGHT:
+                return 300;
+            case PieceType::BISHOP:
+                return 300;
+            case PieceType::ROOK:
+                return 500;
+            case PieceType::QUEEN:
+                return 900;
+            case PieceType::KING:
+                return 10000;
+            default:
+                return 0;
+        }
     }
 
     friend class Engine;

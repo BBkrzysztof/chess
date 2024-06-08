@@ -7,8 +7,8 @@ typedef uint64_t Bitboard;
 const Bitboard FULL_BIT_BOARD = 0xFFFFFFFFFFFFFFFFULL;
 
 enum PieceColor {
-    WHITE_PIECE = 1,
-    BLACK_PIECE = 2
+    WHITE_PIECE = 0,
+    BLACK_PIECE = 1
 };
 
 enum PieceType {

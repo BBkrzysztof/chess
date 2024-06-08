@@ -10,6 +10,7 @@ add_executable(chess main.cpp)
 
 set(SFML_STATIC_LIBRARIES TRUE)
 set(SFML_DIR C:/SFML/lib/cmake/SFML)
+set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 
 find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
 

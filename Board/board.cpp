@@ -92,8 +92,8 @@ std::string Board::getSelectedPiece() {
     return this->selectedPiece;
 }
 
-Piece* Board::getSelectedPieceReference() {
-    return this->pieces[this->selectedPiece];
+Piece* Board::getSelectedPieceReference() const {
+    return this->pieces.at(this->selectedPiece);
 }
 
 void Board::clearIndicators() {
@@ -294,4 +294,20 @@ void Board::registerPiece(Piece* piece, std::string key) {
 
 void Board::setPieces(std::map<std::string, Piece*> pieces) {
     this->pieces = pieces;
+}
+
+Piece* Board::getPieceByPosition(int x, int y) const {
+    auto result = std::find_if(
+            pieces.begin(),
+            pieces.end(),
+            [x, y](const std::pair<std::string, Piece*>& element) {
+                return element.second->getPositionX() == x * 100 && element.second->getPositionY() == y * 100;
+            }
+    );
+
+    if (result != this->pieces.end()) {
+        return result->second;
+    }
+
+    return nullptr;
 }

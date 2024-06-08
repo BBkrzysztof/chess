@@ -6,6 +6,8 @@
 #include <sstream>
 #include <functional>
 #include <SFML/Graphics.hpp>
+#include <random>
+#include <vector>
 
 
 #include "../Piece/King.hpp"
@@ -46,7 +48,7 @@ public:
 
     std::string getSelectedPiece();
 
-    Piece* getSelectedPieceReference();
+    Piece* getSelectedPieceReference() const;
 
     void clearIndicators();
 
@@ -69,6 +71,8 @@ public:
     void setPieces(std::map<std::string, Piece*> pieces);
 
     void setIndicators(const std::vector<MoveIndicator*>& indicators);
+
+    Piece* getPieceByPosition(int x, int y) const;
 
 private:
 
@@ -99,3 +103,4 @@ public:
 
     friend class GameState;
 };
+

@@ -5,11 +5,14 @@
 #include "../Serivces/SelectPieceService.hpp"
 #include "EvaluateBoard.hpp"
 
-#include <thread>
-
 struct bestMove {
     Piece* piece;
     MoveIndicator move;
+};
+
+struct TTEntry {
+    int value;
+    int depth;
 };
 
 class Engine {
@@ -73,7 +76,7 @@ private:
                 }
 
 
-                int boardValue = this->minimax(boardCopy, this->maxDepth - 1);
+                int boardValue = this->minimax(boardCopy, this->maxDepth - 1, INT_MIN, INT_MAX, false);
 
                 if (boardValue > bestValue) {
                     bestValue = boardValue;
@@ -93,15 +96,14 @@ private:
         return {realPiece, bestIndicator};
     }
 
-    int minimax(Board* board, int depth) {
+    int minimax(Board* board, int depth, int alpha, int beta, bool maximizingPlayer) {
 
         auto color = board->gameState->getTurn();
 
         GameState* gameStateEntryCopy = new GameState(*board->gameState);
         Board* boardEntryCopy = new Board(*board, gameStateEntryCopy);
 
-
-        if (depth == 0) {
+        if (depth == 0 || this->board->gameState->getIsCheckMate()) {
 
             int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
 
@@ -112,62 +114,128 @@ private:
         }
 
         auto currentTeam = boardEntryCopy->gameState->getCurrentTeam();
-        int maxEval = INT_MIN;
-        int minEval = INT_MAX;
-        for (const auto& element: currentTeam) {
+        if (maximizingPlayer) {
+            int maxEval = INT_MIN;
+            for (const auto& element: currentTeam) {
 
-            SelectPieceService::Select(element, boardEntryCopy, true);
+                SelectPieceService::Select(element, boardEntryCopy, true);
 
-            if (boardEntryCopy->indicators.empty()) {
-                int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
+                if (boardEntryCopy->indicators.empty()) {
+                    int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
 
-                delete boardEntryCopy;
-                delete gameStateEntryCopy;
+                    delete boardEntryCopy;
+                    delete gameStateEntryCopy;
 
-                return eval;
-            }
-
-
-            for (const auto& indicator: boardEntryCopy->indicators) {
-
-                GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
-                Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
-
-
-                if (indicator->getMoveOption() == MoveOptions::Capture ||
-                    indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
-                    CapturePieceService::Capture(
-                            boardCopy,
-                            boardCopy->getSelectedPieceReference(),
-                            indicator,
-                            this->popUp
-                    );
-                } else {
-                    MovePieceService::Move(
-                            boardCopy,
-                            boardCopy->getSelectedPieceReference(),
-                            indicator,
-                            this->popUp
-                    );
+                    return eval;
                 }
 
-                int eval = this->minimax(board, depth - 1);
+                std::priority_queue<std::pair<MoveIndicator*, int>> moves;
 
-                delete boardCopy;
-                delete gameStateCopy;
+                for (auto& indicator: boardEntryCopy->indicators) {
+                    int moveValue = EvaluateBoard::evaluateMove(*indicator, boardEntryCopy);
+                    moves.emplace(indicator, moveValue);
+                }
 
-                if (color == this->team) {
+                while (!moves.empty()) {
+                    auto indicator = moves.top().first;
+
+                    GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
+                    Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+
+
+                    if (indicator->getMoveOption() == MoveOptions::Capture ||
+                        indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
+                        CapturePieceService::Capture(
+                                boardCopy,
+                                boardCopy->getSelectedPieceReference(),
+                                indicator,
+                                this->popUp
+                        );
+                    } else {
+                        MovePieceService::Move(
+                                boardCopy,
+                                boardCopy->getSelectedPieceReference(),
+                                indicator,
+                                this->popUp
+                        );
+                    }
+
+                    int eval = this->minimax(boardCopy, depth - 1, alpha, beta, false);
+
+                    delete boardCopy;
+                    delete gameStateCopy;
+
                     maxEval = std::max(maxEval, eval);
-                } else {
-                    minEval = std::min(minEval, eval);
+                    alpha = std::max(alpha, eval);
+                    if (beta <= alpha) {
+                        break;
+                    }
+                    moves.pop();
+                }
+            }
+
+            delete boardEntryCopy;
+            delete gameStateEntryCopy;
+
+            return maxEval;
+        } else {
+            int minEval = INT_MAX;
+            for (const auto& element: currentTeam) {
+
+                SelectPieceService::Select(element, boardEntryCopy, true);
+
+                if (boardEntryCopy->indicators.empty()) {
+                    int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
+
+                    delete boardEntryCopy;
+                    delete gameStateEntryCopy;
+
+                    return eval;
+                }
+
+                for (const auto& indicator: boardEntryCopy->indicators) {
+                    for (const auto& indicator: boardEntryCopy->indicators) {
+
+                        GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
+                        Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+
+
+                        if (indicator->getMoveOption() == MoveOptions::Capture ||
+                            indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
+                            CapturePieceService::Capture(
+                                    boardCopy,
+                                    boardCopy->getSelectedPieceReference(),
+                                    indicator,
+                                    this->popUp
+                            );
+                        } else {
+                            MovePieceService::Move(
+                                    boardCopy,
+                                    boardCopy->getSelectedPieceReference(),
+                                    indicator,
+                                    this->popUp
+                            );
+                        }
+
+                        int eval = this->minimax(boardCopy, depth - 1, alpha, beta, true);
+
+                        delete boardCopy;
+                        delete gameStateCopy;
+
+                        minEval = std::min(minEval, eval);
+                        beta = std::min(beta, eval);
+                        if (beta <= alpha) {
+                            break;
+                        }
+                    }
+
+                    delete boardEntryCopy;
+                    delete gameStateEntryCopy;
+
+                    return minEval;
                 }
             }
         }
-
-        delete boardEntryCopy;
-        delete gameStateEntryCopy;
-
-        return color == this->team ? maxEval : minEval;
     }
 
     static void makeMoveOnRealBoard(const bestMove indicator, Board* board) {
@@ -208,6 +276,7 @@ private:
         return new Mock(PieceType::QUEEN);
     }
 
+
 private:
     Board* board;
     Board* originBoard;
@@ -216,3 +285,4 @@ private:
     int maxDepth;
     PieceColor team;
 };
+
