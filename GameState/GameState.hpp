@@ -48,7 +48,6 @@ public:
         this->isCheck = gameState.isCheck;
         this->isCheckmate = gameState.isCheckmate;
         this->isStalemate = gameState.isStalemate;
-//        this->moveHistory = gameState.moveHistory;
         this->validMoves = gameState.validMoves;
         this->captureMoves = gameState.captureMoves;
     }

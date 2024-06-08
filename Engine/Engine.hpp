@@ -43,17 +43,15 @@ private:
         Piece* piece = nullptr;
         int bestValue = INT_MIN;
 
-        GameState* gameStateEntryCopy = new GameState(*board->gameState);
-        Board* boardEntryCopy = new Board(*this->board, gameStateEntryCopy, this->board->getIndicators());
 
         for (const auto& element: currentTeam) {
-            SelectPieceService::Select(element, boardEntryCopy, true);
+            SelectPieceService::Select(element, this->board, true);
 
 
-            for (const auto& indicator: boardEntryCopy->indicators) {
+            for (const auto& indicator: this->board->indicators) {
 
-                GameState* gameStateCopy = new GameState(*gameStateEntryCopy);
-                Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+                GameState* gameStateCopy = new GameState(*this->gameState);
+                Board* boardCopy = new Board(*this->board, gameStateCopy);
 
                 if (indicator->getMoveOption() == MoveOptions::Capture ||
                     indicator->getMoveOption() == MoveOptions::CAPTURE_AND_PROMOTION) {
@@ -72,9 +70,10 @@ private:
                     );
                 }
 
+                boardCopy->isCheck();
+                CheckMateService::checkMate(boardCopy, gameStateCopy);
 
                 int boardValue = this->minimax(boardCopy, this->maxDepth - 1, INT_MIN, INT_MAX, false);
-
                 if (boardValue > bestValue) {
                     bestValue = boardValue;
                     bestIndicator = indicator;
@@ -87,50 +86,36 @@ private:
 
         Piece* realPiece = this->originBoard->pieces[piece->getHash()];
 
-        delete boardEntryCopy;
-        delete gameStateEntryCopy;
-
         return {realPiece, bestIndicator};
     }
 
     int minimax(Board* board, int depth, int alpha, int beta, bool maximizingPlayer) {
 
-        auto color = board->gameState->getTurn();
-
-        GameState* gameStateEntryCopy = new GameState(*board->gameState);
-        Board* boardEntryCopy = new Board(*board, gameStateEntryCopy);
-
         if (depth == 0 || this->board->gameState->getIsCheckMate()) {
 
-            int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
-
-            delete boardEntryCopy;
-            delete gameStateEntryCopy;
+            int eval = EvaluateBoard::evaluate(board);
 
             return eval;
         }
 
-        auto currentTeam = boardEntryCopy->gameState->getCurrentTeam();
+        auto currentTeam = board->gameState->getCurrentTeam();
         if (maximizingPlayer) {
             int maxEval = INT_MIN;
             for (const auto& element: currentTeam) {
 
-                SelectPieceService::Select(element, boardEntryCopy, true);
+                SelectPieceService::Select(element, board, true);
 
-                if (boardEntryCopy->indicators.empty()) {
-                    int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
-
-                    delete boardEntryCopy;
-                    delete gameStateEntryCopy;
+                if (board->indicators.empty()) {
+                    int eval = EvaluateBoard::evaluate(board);
 
                     return eval;
                 }
 
 
-                for (auto& indicator: boardEntryCopy->indicators) {
+                for (auto& indicator: board->indicators) {
 
-                    GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
-                    Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+                    GameState* gameStateCopy = new GameState(*board->gameState);
+                    Board* boardCopy = new Board(*board, gameStateCopy);
 
 
                     if (indicator->getMoveOption() == MoveOptions::Capture ||
@@ -149,6 +134,9 @@ private:
                                 this->popUp
                         );
                     }
+
+                    boardCopy->isCheck();
+                    CheckMateService::checkMate(boardCopy, gameStateCopy);
 
                     int eval = this->minimax(boardCopy, depth - 1, alpha, beta, false);
 
@@ -163,29 +151,17 @@ private:
                 }
             }
 
-            delete boardEntryCopy;
-            delete gameStateEntryCopy;
-
             return maxEval;
         } else {
             int minEval = INT_MAX;
             for (const auto& element: currentTeam) {
 
-                SelectPieceService::Select(element, boardEntryCopy, true);
+                SelectPieceService::Select(element, board, true);
 
-                if (boardEntryCopy->indicators.empty()) {
-                    int eval = EvaluateBoard::evaluate(boardEntryCopy, color);
+                for (const auto& indicator: board->indicators) {
 
-                    delete boardEntryCopy;
-                    delete gameStateEntryCopy;
-
-                    return eval;
-                }
-
-                for (const auto& indicator: boardEntryCopy->indicators) {
-
-                    GameState* gameStateCopy = new GameState(*boardEntryCopy->gameState);
-                    Board* boardCopy = new Board(*boardEntryCopy, gameStateCopy);
+                    GameState* gameStateCopy = new GameState(*board->gameState);
+                    Board* boardCopy = new Board(*board, gameStateCopy);
 
 
                     if (indicator->getMoveOption() == MoveOptions::Capture ||
@@ -205,6 +181,9 @@ private:
                         );
                     }
 
+                    boardCopy->isCheck();
+                    CheckMateService::checkMate(boardCopy, gameStateCopy);
+
                     int eval = this->minimax(boardCopy, depth - 1, alpha, beta, true);
 
                     delete boardCopy;
@@ -216,12 +195,9 @@ private:
                         break;
                     }
                 }
-
-                delete boardEntryCopy;
-                delete gameStateEntryCopy;
-
-                return minEval;
             }
+
+            return minEval;
         }
 
     }
@@ -244,6 +220,10 @@ private:
                     mock
             );
         }
+
+
+        board->isCheck();
+        CheckMateService::checkMate(board, board->gameState);
 
         delete mock;
     }

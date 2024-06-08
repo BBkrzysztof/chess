@@ -63,8 +63,7 @@ int main() {
         }
 
         if (gameState->getTurn() == PieceColor::BLACK_PIECE) {
-            std::thread t(Engine::run, board, gameState, PieceColor::BLACK_PIECE, 4);
-            t.join();
+            Engine::run(board, gameState, PieceColor::BLACK_PIECE, 3);
         }
     }
 

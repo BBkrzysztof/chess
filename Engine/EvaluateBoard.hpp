@@ -3,6 +3,9 @@
 #include "../Board/board.h"
 #include "Engine.hpp"
 
+#define CHECK_BONUS 25
+#define ATTACK_BONUS 5
+
 class EvaluateBoard {
 public:
 
@@ -20,12 +23,33 @@ public:
     static int whiteQueenTable[64];
     static int whiteKingTable[64];
 
-    static int evaluate(const Board* board, PieceColor turnColor) {
+    static int evaluate(const Board* board) {
         int evaluation = 0;
         int evaluation1 = 0;
-        auto enemy = EvaluateBoard::getOpponentColor(turnColor);
-        evaluation = EvaluateBoard::evaluatePieces(board, turnColor);
-        evaluation1 = EvaluateBoard::evaluatePieces(board, enemy);
+
+        evaluation = EvaluateBoard::evaluatePieces(board, PieceColor::BLACK_PIECE);
+        evaluation1 = EvaluateBoard::evaluatePieces(board, PieceColor::WHITE_PIECE);
+
+        evaluation+=EvaluateBoard::evaluateAttackBonus(board,PieceColor::BLACK_PIECE);
+        evaluation1+=EvaluateBoard::evaluateAttackBonus(board,PieceColor::WHITE_PIECE);
+
+        if (board->gameState->getTurn() == PieceColor::BLACK_PIECE) {
+            if (board->gameState->getIsCheck()) {
+                evaluation -= CHECK_BONUS;
+            }
+            if (board->gameState->getIsCheckMate()) {
+                return INT_MIN;
+            }
+        }
+
+        if (board->gameState->getTurn() == PieceColor::WHITE_PIECE) {
+            if (board->gameState->getIsCheck()) {
+                evaluation1 -= CHECK_BONUS;
+            }
+            if (board->gameState->getIsCheckMate()) {
+                return INT_MAX;
+            }
+        }
 
         return evaluation - evaluation1;
     }
@@ -110,6 +134,23 @@ public:
             default:
                 return 0;
         }
+    }
+
+    static int evaluateAttackBonus(const Board* board, const PieceColor& color) {
+
+        int evaluation = 0;
+        auto attack = board->gameState->getAttackedSquares(color);
+        auto enemyBoard = board->gameState->calcBeatable(color);
+
+        Bitboard attackedFields = enemyBoard & attack;
+
+        for (int i = 0; i < 64; i++) {
+            if (attackedFields & (1ULL << i)) {
+                evaluation += ATTACK_BONUS;
+            }
+        }
+
+        return evaluation;
     }
 
     friend class Engine;
